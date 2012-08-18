@@ -443,16 +443,14 @@ function! s:undotreeAction(action)
     echo a:action
 endfunction
 
-" internal command, args:linenr, action
+" internal commands, args:linenr, action
 command! -n=1 -bar UndotreeAction   :call s:undotreeAction(<f-args>)
+command! -n=0 -bar UndotreeUpdate   :call s:undotreeUpdate()
 
 
 command! -n=0 -bar UndotreeToggle   :call s:undotreeToggle()
-command! -n=0 -bar UndotreeUpdate   :call s:undotreeUpdate()
 
 " need a timer to reduce cpu consumption.
 autocmd InsertEnter,InsertLeave,WinEnter,WinLeave,CursorHold,CursorHoldI,CursorMoved * call s:undotreeUpdate()
-
-nnoremap <silent> <F12> :UndotreeToggle<cr>
 
 " vim: set et fdm=marker sts=4 sw=4:
