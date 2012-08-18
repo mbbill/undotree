@@ -1,5 +1,4 @@
-### [Link to Vim.org]
-(....)
+### [Link to Vim.org](http://www.vim.org/scripts/script.php?script_id=4177)
 
 ### Description
 Vim 7.0 added a new feature named **Undo branches**. Basically it's a kind of ability to go back to the text after any change, even if they were undone. Vim stores undo history in a tree which you can browse and manipulate through a bunch of commands. But that was not enough straightforward and a bit hard to use. You may use `:help new-undo-branches` or `:help undo-tree` to get more detailed help.  
@@ -17,8 +16,10 @@ Now this plug-in will free you from those commands and bring back the power of u
  1. TODO: Hotkey support.
  1. TODO: Diff support.
 
+### [Download](https://github.com/mbbill/undotree/tags)
+
 ### Install
- 1. Unpack all scripts into *plugin* directory and that's all. There is no additional dependency.
+ 1. Unpack all scripts into *plugin* directory and that's all. This script is written purely in Vim script with no additional dependency.
 
 ### Usage
  1. Use `:UndotreeToggle` to toggle the undo-tree panel. You may want to map this command to whatever hotkey by adding the following line to your vimrc, take F5 for example.
