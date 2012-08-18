@@ -30,6 +30,7 @@ Now this plug-in will free you from those commands and bring back the power of u
  1. There are a bunch of hotkeys provided by vim to switch between the changes in history, like `u`, `<ctrl-r>`, `g+`, `g-` as well as the `:earlier` and `:later` commands.
  1. Persistent undo
     * It is highly recommend to enable the persistent undo. If you don't like your working directory be messed up with the undo file everywhere.
+
 Add the following line to your *vimrc* in order to make them stored together.
 
     if has("persistent_undo")
