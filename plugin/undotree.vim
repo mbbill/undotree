@@ -1,6 +1,6 @@
 "=================================================
 " File: undotree.vim
-" Description: Visualize your undo history.
+" Description: Manage your undo history in a graph.
 " Author: Ming Bai <mbbill@gmail.com>
 " License: BSD
 
@@ -405,7 +405,7 @@ function! s:undotree.Render()
             if len(node) > 2
                 call insert(slots,node[0],index)
                 call remove(node,0)
-                call insert(slots,node,index)
+                call insert(slots,node,index+1)
             endif
         endif
         unlet node
@@ -451,6 +451,6 @@ command! -n=0 -bar UndotreeUpdate   :call s:undotreeUpdate()
 command! -n=0 -bar UndotreeToggle   :call s:undotreeToggle()
 
 " need a timer to reduce cpu consumption.
-autocmd InsertEnter,InsertLeave,WinEnter,WinLeave,CursorHold,CursorHoldI,CursorMoved * call s:undotreeUpdate()
+autocmd InsertEnter,InsertLeave,WinEnter,WinLeave,CursorMoved * call s:undotreeUpdate()
 
 " vim: set et fdm=marker sts=4 sw=4:
