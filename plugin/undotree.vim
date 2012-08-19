@@ -73,6 +73,7 @@ function! s:undotree.Init()
     let self.current = -1  "current node is the latest.
     let self.asciitree = []     "output data.
     let self.asciimeta = []     "meta data behind ascii tree.
+    let self.asciiCurrLine = -1 "line of the current node in ascii tree.
     " Increase to make it unique.
     let s:undobufNr = s:undobufNr + 1
 endfunction
@@ -126,7 +127,7 @@ function! s:undotree.Show()
     setlocal nobuflisted
     setlocal nospell
     setlocal nonumber
-    "setlocal cursorline
+    setlocal cursorline
     setlocal nomodifiable
     setfiletype undotree
     call s:undotree.BindKey()
@@ -183,6 +184,9 @@ function! s:undotree.Draw()
     exec "normal! " . topPos . "G"
     normal! zt
     exec "normal! " . linePos . "G"
+
+    " set cursor position to current seq.
+    exec "normal! " . self.asciiCurrLine . "G"
     setlocal nomodifiable
     call self.RestoreFocus()
 endfunction
@@ -371,6 +375,7 @@ function! s:undotree.Render()
             if node.curpos
                 let newline = newline.'>'.(node.seq).'< '.
                             \s:gettime(node.time)
+                let self.asciiCurrLine = len(out) " offset to the end.
             else
                 if node.newhead
                     let newline = newline.'['.(node.seq).'] '.
@@ -430,6 +435,7 @@ function! s:undotree.Render()
     endwhile
     let self.asciitree = out
     let self.asciimeta = outmeta
+    let self.asciiCurrLine = len(out) - self.asciiCurrLine
 endfunction
 
 "=================================================
