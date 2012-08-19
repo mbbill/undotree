@@ -528,12 +528,17 @@ function! s:undotree.Render()
                     let newline = newline."/ "
                 endif
             endfor
-            " split P to E+P if elements in p > 2
             call remove(slots,index)
             if len(node) == 2
-                call insert(slots,node[0],index)
-                call insert(slots,node[1],index)
+                if node[0].seq > node[1].seq
+                    call insert(slots,node[0],index)
+                    call insert(slots,node[1],index)
+                else
+                    call insert(slots,node[1],index)
+                    call insert(slots,node[0],index)
+                endif
             endif
+            " split P to E+P if elements in p > 2
             if len(node) > 2
                 call insert(slots,node[0],index)
                 call remove(node,0)
