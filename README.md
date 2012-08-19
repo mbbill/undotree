@@ -11,10 +11,9 @@ Now this plug-in will free you from those commands and bring back the power of u
     * The current position is marked as **>seq<**.
     * The next change that will be restored by `:redo` or `<ctrl-r>` is marked as **{seq}**, it's the same as *curhead* returned by *undotree()*
     * The **[seq]** marks the last change and where further changes will be added, it's the same as *newhead* returned by *undotree()*
- 1. TODO: Revert to a specific change by single click.
- 1. TODO: Delete a part of undo-history.
- 1. TODO: Hotkey support.
- 1. TODO: Diff support.
+ 1. Revert to a specific change by mouse click or enter key.
+ 1. Hotkey support.
+ 1. TODO: Diff between changes.
 
 ### [Download](https://github.com/mbbill/undotree/tags)
 
