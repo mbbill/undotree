@@ -92,10 +92,12 @@ endfunction
 function! s:undotree.SetFocus()
     let winnr = bufwinnr(self.bufname)
     if winnr == -1
-        echoerr "Fatal: can not create window!"
+        echoerr "Fatal: undotree window does not exists! please report bug."
+        return
+    else
+        exec winnr . " wincmd w"
         return
     endif
-    exec winnr . " wincmd w"
 endfunction
 
 function! s:undotree.RestoreFocus()
@@ -164,11 +166,23 @@ endfunction
 
 function! s:undotree.Draw()
     call self.SetFocus()
+
+    " remember the current cursor position.
+    let linePos = line('.') "Line number of cursor
+    normal! H
+    let topPos = line('.') "Line number of the first line in screen.
+
     setlocal modifiable
     silent normal! ggdG
     call append(0,self.asciitree)
+
     "remove the last empty line
     silent normal! Gdd
+
+    " restore previous cursor position.
+    exec "normal! " . topPos . "G"
+    normal! zt
+    exec "normal! " . linePos . "G"
     setlocal nomodifiable
     call self.RestoreFocus()
 endfunction
