@@ -17,6 +17,7 @@ syn match UndotreeSeq ' \zs\d\+\ze '
 syn match UndotreeCurrent '>\d\+<'
 syn match UndotreeNext '{\d\+}'
 syn match UndotreeHead '\[\d\+]'
+syn match UndotreeHelp '^".*$'
 
 hi link UndotreeNode Question
 hi link UndotreeNodeCurrent CursorLineNr
@@ -27,6 +28,7 @@ hi link UndotreeSeq Comment
 hi link UndotreeCurrent CursorLineNr
 hi link UndotreeNext Type
 hi link UndotreeHead Identifier
+hi link UndotreeHelp Comment
 
 let b:undotree_syntax = 'undotree'
 

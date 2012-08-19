@@ -49,4 +49,4 @@ Add the following line to your *vimrc* in order to make them stored together.
 **BSD**
 
 ### Author
-Ming Bai <mbbill AT gmail DOT COM>
+Ming Bai  `<mbbill AT gmail DOT COM>`

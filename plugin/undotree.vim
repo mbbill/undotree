@@ -20,7 +20,7 @@ endif
 
 " TODO remember split size.
 if !exists('g:undotreeSplitSize')
-    let g:undotreeSplitSize = 24
+    let g:undotreeSplitSize = 28
 endif
 
 
@@ -29,14 +29,15 @@ endif
 let s:undobufNr = 0
 
 " Keymap
-let s:keymap = {}
-let s:keymap['<cr>']='enter'
-let s:keymap['J']='godown'
-let s:keymap['K']='goup'
-let s:keymap['u']='undo'
-let s:keymap['<c-r>']='redo'
-let s:keymap['<c>']='clear'
-
+let s:keymap = []
+" action, key, help.
+let s:keymap += [['Enter','<cr>','Revert to current node']]
+let s:keymap += [['Enter','<2-LeftMouse>','Revert to current node']]
+let s:keymap += [['Godown','J','Revert to previous node']]
+let s:keymap += [['Goup','K','Revert to next node']]
+let s:keymap += [['Undo','u','Undo']]
+let s:keymap += [['Redo','<c-r>','Redo']]
+let s:keymap += [['Help','?','Toggle quick help']]
 
 function! s:new(obj)
     let newobj = deepcopy(a:obj)
@@ -70,16 +71,73 @@ function! s:undotree.Init()
     let self.rawtree = {}  "data passed from undotree()
     let self.tree = {}     "data converted to internal format.
     let self.nodelist = {} "stores an ordered list of items points to self.tree
-    let self.current = -1  "current node is the latest.
+    let self.currentseq = -1  "current node is the latest.
     let self.asciitree = []     "output data.
     let self.asciimeta = []     "meta data behind ascii tree.
-    let self.asciiCurrLine = -1 "line of the current node in ascii tree.
+    let self.currentIndex = -1 "line of the current node in ascii tree.
+    let self.showHelp = 0
     " Increase to make it unique.
     let s:undobufNr = s:undobufNr + 1
 endfunction
 
 function! s:undotree.BindKey()
-    silent! exec "nnoremap <buffer> "."<cr>"." :UndotreeAction "."
+    for i in s:keymap
+        silent! exec 'nnoremap <silent> <buffer> '.i[1].' :UndotreeAction '.i[0].'<cr>'
+    endfor
+endfunction
+
+function! s:undotree.Action(action)
+    if !self.IsVisible()
+        "echoerr "Fatal: window does not exists."
+        return
+    endif
+    if !has_key(self,'Action'.a:action)
+        echoerr "Fatal: Action does not exists!"
+        return
+    endif
+    silent! exec 'call self.Action'.a:action.'()'
+endfunction
+
+function! s:undotree.ActionHelp()
+    let self.showHelp = !self.showHelp
+    call self.Draw()
+    call self.SetFocus() " keep focus.
+endfunction
+
+" Helper function, do action in target window.
+function! s:undotree.ActionInTarget(cmd)
+    if !self.SetTargetFocus()
+        return
+    endif
+    silent! exec a:cmd
+    call self.SetFocus()
+endfunction
+
+function! s:undotree.ActionEnter()
+    let index = self.Screen2Index(line('.'))
+    if index < 0
+        return
+    endif
+    if (self.asciimeta[index].seq) == -1
+        return
+    endif
+    call self.ActionInTarget('u '.self.asciimeta[index].seq)
+endfunction
+
+function! s:undotree.ActionUndo()
+    call self.ActionInTarget('undo')
+endfunction
+
+function! s:undotree.ActionRedo()
+    call self.ActionInTarget('redo')
+endfunction
+
+function! s:undotree.ActionGodown()
+    call self.ActionInTarget('earlier')
+endfunction
+
+function! s:undotree.ActionGoup()
+    call self.ActionInTarget('later')
 endfunction
 
 function! s:undotree.IsVisible()
@@ -90,14 +148,33 @@ function! s:undotree.IsVisible()
     endif
 endfunction
 
+function! s:undotree.IsTargetVisible()
+    if bufwinnr(self.targetBufname) != -1
+        return 1
+    else
+        return 0
+    endif
+endfunction
+
 function! s:undotree.SetFocus()
     let winnr = bufwinnr(self.bufname)
     if winnr == -1
-        echoerr "Fatal: undotree window does not exists! please report bug."
+        echoerr "Fatal: undotree window does not exist!"
         return
     else
         exec winnr . " wincmd w"
         return
+    endif
+endfunction
+
+" May fail due to target window closed.
+function! s:undotree.SetTargetFocus()
+    let winnr = bufwinnr(self.targetBufname)
+    if winnr == -1
+        return 0
+    else
+        exec winnr . " wincmd w"
+        return 1
     endif
 endfunction
 
@@ -158,11 +235,46 @@ function! s:undotree.Update(bufname, rawtree)
     endif
     let self.targetBufname = a:bufname
     let self.rawtree = a:rawtree
-    let self.current = -1
+    let self.currentseq = -1
     let self.nodelist = {}
+    let self.currentIndex = -1
     call self.ConvertInput()
     call self.Render()
     call self.Draw()
+endfunction
+
+function! s:undotree.AppendHelp()
+    call append(0,'') "empty line
+    if self.showHelp
+        for i in s:keymap
+            call append(0,'" '.i[1].': '.i[2])
+        endfor
+        call append(0,'" ------------------')
+        call append(0,'" undotree quickhelp')
+    else
+        call append(0,'" Press ? for help.')
+    endif
+endfunction
+
+function! s:undotree.Index2Screen(index)
+    " calculate line number according to the help text.
+    " index starts from zero and lineNr starts from 1.
+    if self.showHelp
+        let lineNr = a:index + len(s:keymap) + 3 + 1
+    else
+        let lineNr = a:index + 2 + 1
+    endif
+    return lineNr
+endfunction
+
+" <0 if index is invalid. e.g. current line is in help text.
+function! s:undotree.Screen2Index(line)
+    if self.showHelp
+        let index = a:line - len(s:keymap) - 3 - 1
+    else
+        let index = a:line - 2 - 1
+    endif
+    return index
 endfunction
 
 function! s:undotree.Draw()
@@ -177,6 +289,8 @@ function! s:undotree.Draw()
     silent normal! ggdG
     call append(0,self.asciitree)
 
+    call self.AppendHelp()
+
     "remove the last empty line
     silent normal! Gdd
 
@@ -185,8 +299,7 @@ function! s:undotree.Draw()
     normal! zt
     exec "normal! " . linePos . "G"
 
-    " set cursor position to current seq.
-    exec "normal! " . self.asciiCurrLine . "G"
+    exec "normal! " . self.Index2Screen(self.currentIndex) . "G"
     setlocal nomodifiable
     call self.RestoreFocus()
 endfunction
@@ -223,7 +336,7 @@ function! s:undotree._parseNode(in,out)
             let newnode.curhead = i.curhead
             let curnode.curpos = 1
             " See 'Note' below.
-            let self.current = curnode.seq
+            let self.currentseq = curnode.seq
         endif
         "endif
         let self.nodelist[newnode.seq] = newnode
@@ -250,9 +363,9 @@ function! s:undotree.ConvertInput()
     " but in fact it's not. May be bug, bug anyway I found a workaround:
     " first try to find the parent node of 'curhead', if not found, then use
     " seq_cur.
-    if self.current == -1
-        let self.current = self.rawtree.seq_cur
-        let self.nodelist[self.current].curpos = 1
+    if self.currentseq == -1
+        let self.currentseq = self.rawtree.seq_cur
+        let self.nodelist[self.currentseq].curpos = 1
     endif
 endfunction
 
@@ -375,7 +488,7 @@ function! s:undotree.Render()
             if node.curpos
                 let newline = newline.'>'.(node.seq).'< '.
                             \s:gettime(node.time)
-                let self.asciiCurrLine = len(out) " offset to the end.
+                let self.currentIndex = len(out) + 1 "index from zero.
             else
                 if node.newhead
                     let newline = newline.'['.(node.seq).'] '.
@@ -435,7 +548,7 @@ function! s:undotree.Render()
     endwhile
     let self.asciitree = out
     let self.asciimeta = outmeta
-    let self.asciiCurrLine = len(out) - self.asciiCurrLine
+    let self.currentIndex = len(out) - self.currentIndex
 endfunction
 
 "=================================================
@@ -460,17 +573,21 @@ function! s:undotreeToggle()
 endfunction
 
 function! s:undotreeAction(action)
-    echo a:action
+    if type(gettabvar(tabpagenr(),'undotree')) != type(s:undotree)
+        echoerr "Fatal: t:undotree does not exists!"
+        return
+    endif
+    call t:undotree.Action(a:action)
 endfunction
 
-" internal commands, args:linenr, action
+" Internal commands, args:linenr, action
 command! -n=1 -bar UndotreeAction   :call s:undotreeAction(<f-args>)
 command! -n=0 -bar UndotreeUpdate   :call s:undotreeUpdate()
 
 
+" User commands.
 command! -n=0 -bar UndotreeToggle   :call s:undotreeToggle()
 
-" need a timer to reduce cpu consumption.
 autocmd InsertEnter,InsertLeave,WinEnter,WinLeave,CursorMoved * call s:undotreeUpdate()
 
 " vim: set et fdm=marker sts=4 sw=4:
