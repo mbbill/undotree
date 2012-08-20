@@ -95,7 +95,7 @@ function! s:undotree.BindKey()
 endfunction
 
 function! s:undotree.Action(action)
-    if !self.IsVisible()
+    if !self.IsVisible() || bufname("%") != self.bufname
         "echoerr "Fatal: window does not exists."
         return
     endif
@@ -109,7 +109,6 @@ endfunction
 function! s:undotree.ActionHelp()
     let self.showHelp = !self.showHelp
     call self.Draw()
-    call self.SetFocus() " keep focus.
 endfunction
 
 " Helper function, do action in target window, and then update itself.
@@ -119,8 +118,8 @@ function! s:undotree.ActionInTarget(cmd)
     endif
     call s:exec(a:cmd)
     call self.UpdateTarget()
-    call self.Update()
     call self.SetFocus()
+    call self.Update()
 endfunction
 
 function! s:undotree.ActionEnter()
@@ -139,7 +138,7 @@ function! s:undotree.ActionUndo()
 endfunction
 
 function! s:undotree.ActionRedo()
-    call self.ActionInTarget('redo')
+    call self.ActionInTarget("redo")
 endfunction
 
 function! s:undotree.ActionGodown()
@@ -172,7 +171,8 @@ function! s:undotree.SetFocus()
         echoerr "Fatal: undotree window does not exist!"
         return
     else
-        call s:exec(winnr . " wincmd w")
+        " wincmd would cause cursor outside window.
+        call s:exec("norm! ".winnr."\<c-w>\<c-w>")
         return
     endif
 endfunction
@@ -183,7 +183,7 @@ function! s:undotree.SetTargetFocus()
     if winnr == -1
         return 0
     else
-        call s:exec(winnr . " wincmd w")
+        call s:exec("norm! ".winnr."\<c-w>\<c-w>")
         return 1
     endif
 endfunction
@@ -191,7 +191,7 @@ endfunction
 function! s:undotree.RestoreFocus()
     let previousWinnr = winnr("#")
     if previousWinnr > 0
-        call s:exec(previousWinnr . "wincmd w")
+        call s:exec("norm! ".previousWinnr."\<c-w>\<c-w>")
     endif
 endfunction
 
@@ -229,8 +229,7 @@ function! s:undotree.Hide()
     if !self.IsVisible()
         return
     endif
-    let winnr = bufwinnr(self.bufname)
-    call s:exec(winnr . " wincmd w")
+    call self.SetFocus()
     quit
     " quit this window will restore focus to the previous window automatically.
 endfunction
@@ -252,10 +251,7 @@ function! s:undotree.Update()
     let self.currentIndex = -1
     call self.ConvertInput()
     call self.Render()
-
-    call self.SetFocus()
     call self.Draw()
-    call self.RestoreFocus()
 endfunction
 
 " execute this in target window.
@@ -589,7 +585,9 @@ function! s:undotreeUpdate()
         return
     endif
     call t:undotree.UpdateTarget()
+    call t:undotree.SetFocus()
     call t:undotree.Update()
+    call t:undotree.RestoreFocus()
 endfunction
 
 function! s:undotreeToggle()
