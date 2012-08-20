@@ -44,6 +44,9 @@ Add the following line to your *vimrc* in order to make them stored together.
 ### Screenshot
 ![](http://files.myopera.com/mbbill/files/undotree.png)
 
+### For any Issues
+https://github.com/mbbill/undotree/issues
+
 ### License
 **BSD**
 
