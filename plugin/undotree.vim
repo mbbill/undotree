@@ -65,10 +65,28 @@ endfunction
 
 " Exec without autocommands
 function! s:exec(cmd)
+    call s:log("s:exec() ".a:cmd)
     let ei_bak= &eventignore
     set eventignore=all
     silent exe a:cmd
     let &eventignore = ei_bak
+endfunction
+
+let s:debug = 0
+let s:debugfile = '~/undotree_debug.log'
+function! s:debugon()
+    let s:debug = 1
+    exec 'redir >> '. s:debugfile
+    silent echo "=======================================\n"
+    redir END
+endfunction
+
+function! s:log(msg)
+    if s:debug
+        exec 'redir >> ' . s:debugfile
+        silent echon strftime('%H:%M:%S') . ': ' . a:msg . "\n"
+        redir END
+    endif
 endfunction
 
 "=================================================
@@ -95,11 +113,12 @@ endfunction
 
 function! s:undotree.BindKey()
     for i in s:keymap
-        silent exec 'nnoremap <silent> <buffer> '.i[1].' :UndotreeAction '.i[0].'<cr>'
+        silent exec 'nnoremap <silent> <buffer> '.i[1].' :call UndotreeAction("'.i[0].'")<cr>'
     endfor
 endfunction
 
 function! s:undotree.Action(action)
+    call s:log("Action() ".a:action)
     if !self.IsVisible() || bufname("%") != self.bufname
         "echoerr "Fatal: window does not exists."
         return
@@ -172,6 +191,7 @@ endfunction
 
 function! s:undotree.SetFocus()
     let winnr = bufwinnr(self.bufname)
+    call s:log("SetFocus() winnr:".winnr." bufname:".self.bufname)
     if winnr == -1
         echoerr "Fatal: undotree window does not exist!"
         return
@@ -185,6 +205,7 @@ endfunction
 " May fail due to target window closed.
 function! s:undotree.SetTargetFocus()
     let winnr = bufwinnr(self.targetBufname)
+    call s:log("SetTargetFocus() winnr:".winnr." targetBufname:".self.targetBufname)
     if winnr == -1
         return 0
     else
@@ -195,12 +216,14 @@ endfunction
 
 function! s:undotree.RestoreFocus()
     let previousWinnr = winnr("#")
+    call s:log("RestoreFocus() previousWinnr:".previousWinnr)
     if previousWinnr > 0
         call s:exec("norm! ".previousWinnr."\<c-w>\<c-w>")
     endif
 endfunction
 
 function! s:undotree.Show()
+    call s:log("Show()")
     if self.IsVisible()
         return
     endif
@@ -226,11 +249,13 @@ function! s:undotree.Show()
     setlocal nomodifiable
     setfiletype undotree
     call s:undotree.BindKey()
+    " why refresh twice here?
     call self.Update()
     call self.RestoreFocus()
 endfunction
 
 function! s:undotree.Hide()
+    call s:log("Hide()")
     if !self.IsVisible()
         return
     endif
@@ -240,6 +265,7 @@ function! s:undotree.Hide()
 endfunction
 
 function! s:undotree.Toggle()
+    call s:log("Toggle()")
     if self.IsVisible()
         call self.Hide()
     else
@@ -248,6 +274,7 @@ function! s:undotree.Toggle()
 endfunction
 
 function! s:undotree.Update()
+    call s:log("Update()")
     if !self.IsVisible()
         return
     endif
@@ -303,7 +330,7 @@ endfunction
 function! s:undotree.Draw()
     " remember the current cursor position.
     let linePos = line('.') "Line number of cursor
-    normal! H
+    call s:exec('normal! H')
     let topPos = line('.') "Line number of the first line in screen.
 
     setlocal modifiable
@@ -579,7 +606,8 @@ endfunction
 
 "=================================================
 " It will set the target of undotree window to the current editing buffer.
-function! s:undotreeUpdate()
+function! UndotreeUpdate()
+    call s:log(">>>>>>> UndotreeUpdate()")
     if type(gettabvar(tabpagenr(),'undotree')) != type(s:undotree)
         return
     endif
@@ -589,20 +617,28 @@ function! s:undotreeUpdate()
     if mode() != 'n' "not in normal mode, return.
         return
     endif
+    if !t:undotree.IsVisible()
+        return
+    endif
+    call s:log(">>> UndotreeUpdate()")
     call t:undotree.UpdateTarget()
     call t:undotree.SetFocus()
     call t:undotree.Update()
     call t:undotree.RestoreFocus()
+    call s:log("<<< UndotreeUpdate() leave")
 endfunction
 
-function! s:undotreeToggle()
+function! UndotreeToggle()
+    call s:log(">>> UndotreeToggle()")
     if type(gettabvar(tabpagenr(),'undotree')) != type(s:undotree)
         let t:undotree = s:new(s:undotree)
     endif
     call t:undotree.Toggle()
+    call s:log("<<< UndotreeToggle() leave")
 endfunction
 
-function! s:undotreeAction(action)
+function! UndotreeAction(action)
+    call s:log("UndotreeAction()")
     if type(gettabvar(tabpagenr(),'undotree')) != type(s:undotree)
         echoerr "Fatal: t:undotree does not exists!"
         return
@@ -610,14 +646,15 @@ function! s:undotreeAction(action)
     call t:undotree.Action(a:action)
 endfunction
 
-" Internal commands, args:linenr, action
-command! -n=1 -bar UndotreeAction   :call s:undotreeAction(<f-args>)
-command! -n=0 -bar UndotreeUpdate   :call s:undotreeUpdate()
+function! UndotreeDebugon()
+    call s:debugon()
+endfunction
 
+autocmd InsertEnter,InsertLeave,WinEnter,WinLeave,CursorMoved * call UndotreeUpdate()
 
+"=================================================
 " User commands.
-command! -n=0 -bar UndotreeToggle   :call s:undotreeToggle()
+command! -n=0 -bar UndotreeToggle   :call UndotreeToggle()
 
-autocmd InsertEnter,InsertLeave,WinEnter,WinLeave,CursorMoved * call s:undotreeUpdate()
 
 " vim: set et fdm=marker sts=4 sw=4:
