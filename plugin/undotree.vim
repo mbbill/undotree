@@ -565,6 +565,9 @@ function! s:undotreeUpdate()
     if &bt != '' "it's nor a normal buffer, could be help, quickfix, etc.
         return
     endif
+    if mode() != 'n' "not in normal mode, return.
+        return
+    endif
     let bufname = bufname("%") "current buffer
     let rawtree = undotree()
     call t:undotree.Update(bufname, rawtree)
