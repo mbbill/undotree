@@ -121,8 +121,13 @@ endfunction
 
 function! s:undotree.BindKey()
     for i in s:keymap
-        silent exec 'nnoremap <silent> <buffer> '.i[1].' :call UndotreeAction("'.i[0].'")<cr>'
+        silent exec 'nnoremap <silent> <script> <buffer> '.i[1].' :call <sid>undotreeAction("'.i[0].'")<cr>'
     endfor
+endfunction
+
+function! s:undotree.BindAu()
+    " Auto exit if it's the last window
+    au WinEnter <buffer> if winbufnr(2)==-1 | quit | endif
 endfunction
 
 function! s:undotree.Action(action)
@@ -256,7 +261,8 @@ function! s:undotree.Show()
     setlocal cursorline
     setlocal nomodifiable
     setfiletype undotree
-    call s:undotree.BindKey()
+    call self.BindKey()
+    call self.BindAu()
     " why refresh twice here?
     call self.Update()
     if g:undotreeSetFocusWhenToggle == 0
@@ -647,8 +653,8 @@ function! UndotreeToggle()
     call s:log("<<< UndotreeToggle() leave")
 endfunction
 
-function! UndotreeAction(action)
-    call s:log("UndotreeAction()")
+function! s:undotreeAction(action)
+    call s:log("undotreeAction()")
     if type(gettabvar(tabpagenr(),'undotree')) != type(s:undotree)
         echoerr "Fatal: t:undotree does not exists!"
         return
@@ -656,11 +662,11 @@ function! UndotreeAction(action)
     call t:undotree.Action(a:action)
 endfunction
 
-autocmd InsertEnter,InsertLeave,WinEnter,WinLeave,CursorMoved * call UndotreeUpdate()
+let s:auEvents = "InsertEnter,InsertLeave,WinEnter,WinLeave,CursorMoved"
+exec "au ".s:auEvents." * call UndotreeUpdate()"
 
 "=================================================
 " User commands.
 command! -n=0 -bar UndotreeToggle   :call UndotreeToggle()
-
 
 " vim: set et fdm=marker sts=4 sw=4:
