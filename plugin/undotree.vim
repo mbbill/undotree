@@ -80,9 +80,9 @@ function! s:exec(cmd)
 endfunction
 
 let s:debug = 0
-let s:debugfile = 'undotree_debug.log'
+let s:debugfile = $HOME.'/undotree_debug.log'
 " If debug file exists, enable debug output.
-if filewritable($HOME.'/'.s:debugfile)
+if filewritable(s:debugfile)
     let s:debug = 1
     exec 'redir >> '. s:debugfile
     silent echo "=======================================\n"
