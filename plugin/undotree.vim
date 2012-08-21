@@ -9,20 +9,27 @@ if v:version < 700
      finish
 endif
 
-" Options
+" split window location
 if !exists('g:undotreeSplitLocation')
     let g:undotreeSplitLocation = 'topleft'
 endif
 
+" split window mode
 if !exists('g:undotreeSplitMode')
     let g:undotreeSplitMode = 'vertical'
 endif
 
 " TODO remember split size.
+" split window size
 if !exists('g:undotreeSplitSize')
     let g:undotreeSplitSize = 28
 endif
 
+" if set, let undotree window get focus after being opened, otherwise the
+" focus stay in current window.
+if !exists('g:undotreeSetFocusWhenToggle')
+    let g:undotreeSetFocusWhenToggle = 0
+endif
 
 "=================================================
 " Golbal buf counter.
@@ -73,13 +80,14 @@ function! s:exec(cmd)
 endfunction
 
 let s:debug = 0
-let s:debugfile = '~/undotree_debug.log'
-function! s:debugon()
+let s:debugfile = 'undotree_debug.log'
+" If debug file exists, enable debug output.
+if filewritable($HOME.'/'.s:debugfile)
     let s:debug = 1
     exec 'redir >> '. s:debugfile
     silent echo "=======================================\n"
     redir END
-endfunction
+endif
 
 function! s:log(msg)
     if s:debug
@@ -251,7 +259,9 @@ function! s:undotree.Show()
     call s:undotree.BindKey()
     " why refresh twice here?
     call self.Update()
-    call self.RestoreFocus()
+    if g:undotreeSetFocusWhenToggle == 0
+        call self.RestoreFocus()
+    endif
 endfunction
 
 function! s:undotree.Hide()
@@ -644,10 +654,6 @@ function! UndotreeAction(action)
         return
     endif
     call t:undotree.Action(a:action)
-endfunction
-
-function! UndotreeDebugon()
-    call s:debugon()
 endfunction
 
 autocmd InsertEnter,InsertLeave,WinEnter,WinLeave,CursorMoved * call UndotreeUpdate()
