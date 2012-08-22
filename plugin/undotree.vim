@@ -153,6 +153,18 @@ endfunction
 " extended from panel.
 let s:undotree = s:new(s:panel)
 
+" {rawtree}
+"     |
+"     | ConvertInput()               [seq2index]--> [seq1:index1]
+"     v                                             [seq2:index2] ---+
+"  {tree}                                               ...          |
+"     |                                    [asciimeta]               |
+"     | Render()                                |                    |
+"     v                                         v                    |
+" [asciitree] --> [" * | SEQ DDMMYY "] <==> [node1{seq,time,..}]     |
+"                 [" |/             "]      [node2{seq,time,..}] <---+
+"                         ...                       ...
+
 function! s:undotree.Init()
     let self.bufname = "undotree_".s:cntr
     " Increase to make it unique.
@@ -592,7 +604,7 @@ function! s:undotree.Render()
             if node.curpos
                 let newline = newline.'>'.(node.seq).'< '.
                             \s:gettime(node.time)
-                let self.currentIndex = len(out) + 1 "index from zero.
+                let self.currentIndex = len(out) + 1
             else
                 if node.newhead
                     let newline = newline.'['.(node.seq).'] '.
