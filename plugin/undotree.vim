@@ -4,36 +4,46 @@
 " Author: Ming Bai <mbbill@gmail.com>
 " License: BSD
 
+" TODO diff panel
+" TODO remember split size.
+" TODO status line.
+" TODO do not need to redraw
+" TODO fix diff update cause cursor move.
+
 " At least version 7.0 is needed for undo branches.
 if v:version < 700
      finish
 endif
 
-" split window location
-if !exists('g:undotreeSplitLocation')
-    let g:undotreeSplitLocation = 'topleft'
+" split window location, could also be topright
+if !exists('g:undotree_SplitLocation')
+    let g:undotree_SplitLocation = 'topleft'
 endif
 
-" split window mode
-if !exists('g:undotreeSplitMode')
-    let g:undotreeSplitMode = 'vertical'
+" undotree window width
+if !exists('g:undotree_SplitWidth')
+    let g:undotree_SplitWidth = 28
 endif
 
-" TODO remember split size.
-" split window size
-if !exists('g:undotreeSplitSize')
-    let g:undotreeSplitSize = 28
+" if set, let undotree window get focus after being opened, otherwise
+" focus will stay in current window.
+if !exists('g:undotree_SetFocusWhenToggle')
+    let g:undotree_SetFocusWhenToggle = 0
 endif
 
-" if set, let undotree window get focus after being opened, otherwise the
-" focus stay in current window.
-if !exists('g:undotreeSetFocusWhenToggle')
-    let g:undotreeSetFocusWhenToggle = 0
+" diff window height
+if !exists('g:undotree_diffpanelHeight')
+    let g:undotree_diffpanelHeight = 10
+endif
+
+" auto open diff window
+if !exists('g:undotree_diffAutoOpen')
+    let g:undotree_diffAutoOpen = 0
 endif
 
 "=================================================
 " Golbal buf counter.
-let s:undobufNr = 0
+let s:cntr = 0
 
 " Help text
 let s:helpmore = ['" Undotree quick help',
@@ -43,13 +53,14 @@ let s:helpless = ['" Press ? for help.']
 " Keymap
 let s:keymap = []
 " action, key, help.
-let s:keymap += [['Enter','<cr>','Revert to current state']]
-let s:keymap += [['Enter','<2-LeftMouse>','Revert to current state']]
-let s:keymap += [['Godown','J','Revert to previous state']]
-let s:keymap += [['Goup','K','Revert to next state']]
-let s:keymap += [['Undo','u','Undo']]
-let s:keymap += [['Redo','<c-r>','Redo']]
 let s:keymap += [['Help','?','Toggle quick help']]
+let s:keymap += [['DiffToggle','D','Toggle diff panel']]
+let s:keymap += [['Goup','K','Revert to next state']]
+let s:keymap += [['Godown','J','Revert to previous state']]
+let s:keymap += [['Redo','<c-r>','Redo']]
+let s:keymap += [['Undo','u','Undo']]
+let s:keymap += [['Enter','<2-LeftMouse>','Revert to current state']]
+let s:keymap += [['Enter','<cr>','Revert to current state']]
 
 function! s:new(obj)
     let newobj = deepcopy(a:obj)
@@ -98,14 +109,57 @@ function! s:log(msg)
 endfunction
 
 "=================================================
-" Template object, like a class.
-let s:undotree = {}
+"Base class for panels.
+let s:panel = {}
+
+function! s:panel.Init()
+    let self.bufname = "invalid"
+endfunction
+
+function! s:panel.SetFocus()
+    let winnr = bufwinnr(self.bufname)
+    call s:log("SetFocus() winnr:".winnr." bufname:".self.bufname)
+    " already focused.
+    if winnr == winnr()
+        return
+    endif
+    if winnr == -1
+        echoerr "Fatal: window does not exist!"
+        return
+    endif
+    " wincmd would cause cursor outside window.
+    call s:exec("norm! ".winnr."\<c-w>\<c-w>")
+endfunction
+
+function! s:panel.IsVisible()
+    if bufwinnr(self.bufname) != -1
+        return 1
+    else
+        return 0
+    endif
+endfunction
+
+function! s:panel.Hide()
+    call s:log(self.bufname." Hide()")
+    if !self.IsVisible()
+        return
+    endif
+    call self.SetFocus()
+    call s:exec("quit")
+endfunction
+
+"=================================================
+" undotree panel class.
+" extended from panel.
+let s:undotree = s:new(s:panel)
 
 function! s:undotree.Init()
-    let self.bufname = "undotree_".s:undobufNr
-    let self.location = g:undotreeSplitLocation
-    let self.mode = g:undotreeSplitMode
-    let self.size = g:undotreeSplitSize
+    let self.bufname = "undotree_".s:cntr
+    " Increase to make it unique.
+    let s:cntr = s:cntr + 1
+    let self.location = g:undotree_SplitLocation
+    let self.mode = 'vertical'
+    let self.size = g:undotree_SplitWidth
     let self.targetBufname = ''
     let self.rawtree = {}  "data passed from undotree()
     let self.tree = {}     "data converted to internal format.
@@ -115,8 +169,6 @@ function! s:undotree.Init()
     let self.asciimeta = []     "meta data behind ascii tree.
     let self.currentIndex = -1 "line of the current node in ascii tree.
     let self.showHelp = 0
-    " Increase to make it unique.
-    let s:undobufNr = s:undobufNr + 1
 endfunction
 
 function! s:undotree.BindKey()
@@ -127,11 +179,12 @@ endfunction
 
 function! s:undotree.BindAu()
     " Auto exit if it's the last window
-    au WinEnter <buffer> if winbufnr(2)==-1 | quit | endif
+    au WinEnter <buffer> if !t:undotree.IsTargetVisible() |
+                \call t:undotree.Hide() | call t:diffpanel.Hide() | endif
 endfunction
 
 function! s:undotree.Action(action)
-    call s:log("Action() ".a:action)
+    call s:log("undotree.Action() ".a:action)
     if !self.IsVisible() || bufname("%") != self.bufname
         "echoerr "Fatal: window does not exists."
         return
@@ -186,12 +239,25 @@ function! s:undotree.ActionGoup()
     call self.ActionInTarget('later')
 endfunction
 
-function! s:undotree.IsVisible()
-    if bufwinnr(self.bufname) != -1
-        return 1
-    else
-        return 0
+function! s:undotree.ActionDiffToggle()
+    call t:diffpanel.Toggle()
+endfunction
+
+function! s:undotree.UpdateDiff()
+    if !t:diffpanel.IsVisible()
+        return
     endif
+    let index = self.Screen2Index(line('.'))
+    if index < 0
+        return
+    endif
+    " -1: invalid node.
+    "  0: no parent node.
+    " >0: assume that seq>0 always has parent.
+    if (self.asciimeta[index].seq) <= 0
+        return
+    endif
+    call t:diffpanel.Update(self.asciimeta[index].seq,self.targetBufname)
 endfunction
 
 function! s:undotree.IsTargetVisible()
@@ -202,23 +268,10 @@ function! s:undotree.IsTargetVisible()
     endif
 endfunction
 
-function! s:undotree.SetFocus()
-    let winnr = bufwinnr(self.bufname)
-    call s:log("SetFocus() winnr:".winnr." bufname:".self.bufname)
-    if winnr == -1
-        echoerr "Fatal: undotree window does not exist!"
-        return
-    else
-        " wincmd would cause cursor outside window.
-        call s:exec("norm! ".winnr."\<c-w>\<c-w>")
-        return
-    endif
-endfunction
-
 " May fail due to target window closed.
 function! s:undotree.SetTargetFocus()
     let winnr = bufwinnr(self.targetBufname)
-    call s:log("SetTargetFocus() winnr:".winnr." targetBufname:".self.targetBufname)
+    call s:log("undotree.SetTargetFocus() winnr:".winnr." targetBufname:".self.targetBufname)
     if winnr == -1
         return 0
     else
@@ -227,16 +280,18 @@ function! s:undotree.SetTargetFocus()
     endif
 endfunction
 
-function! s:undotree.RestoreFocus()
-    let previousWinnr = winnr("#")
-    call s:log("RestoreFocus() previousWinnr:".previousWinnr)
-    if previousWinnr > 0
-        call s:exec("norm! ".previousWinnr."\<c-w>\<c-w>")
+function! s:undotree.Toggle()
+    call s:log(self.bufname." Toggle()")
+    if self.IsVisible()
+        call self.Hide()
+        call t:diffpanel.Hide()
+    else
+        call self.Show()
     endif
 endfunction
 
 function! s:undotree.Show()
-    call s:log("Show()")
+    call s:log("undotree.Show()")
     if self.IsVisible()
         return
     endif
@@ -265,32 +320,16 @@ function! s:undotree.Show()
     call self.BindAu()
     " why refresh twice here?
     call self.Update()
-    if g:undotreeSetFocusWhenToggle == 0
-        call self.RestoreFocus()
+    if g:undotree_diffAutoOpen
+        call t:diffpanel.Show()
     endif
-endfunction
-
-function! s:undotree.Hide()
-    call s:log("Hide()")
-    if !self.IsVisible()
-        return
-    endif
-    call self.SetFocus()
-    call s:exec("quit")
-    " quit this window will restore focus to the previous window automatically.
-endfunction
-
-function! s:undotree.Toggle()
-    call s:log("Toggle()")
-    if self.IsVisible()
-        call self.Hide()
-    else
-        call self.Show()
+    if !g:undotree_SetFocusWhenToggle
+        call self.SetTargetFocus()
     endif
 endfunction
 
 function! s:undotree.Update()
-    call s:log("Update()")
+    call s:log("undotree.Update()")
     if !self.IsVisible()
         return
     endif
@@ -300,6 +339,7 @@ function! s:undotree.Update()
     call self.ConvertInput()
     call self.Render()
     call self.Draw()
+    call self.UpdateDiff()
 endfunction
 
 " execute this in target window.
@@ -621,13 +661,139 @@ function! s:undotree.Render()
 endfunction
 
 "=================================================
+"diff panel
+let s:diffpanel = s:new(s:panel)
+
+function! s:diffpanel.Update(seq,targetBufname)
+    call s:log('diffpanel.Update(),seq:'.a:seq.' bufname:'.a:targetBufname)
+    " TODO check seq if cache hit.
+
+    let ei_bak = &eventignore
+    set eventignore=all
+
+    let winnr = bufwinnr(a:targetBufname)
+    if winnr == -1
+        return
+    else
+        exec winnr." wincmd w"
+    endif
+    let new = getbufline(a:targetBufname,'^','$')
+    undo
+    let old = getbufline(a:targetBufname,'^','$')
+    redo
+
+    let &eventignore = ei_bak
+
+    call self.SetFocus()
+    setlocal modifiable
+    call s:exec('1,$ d _')
+    let tempfile1 = tempname()
+    let tempfile2 = tempname()
+    if writefile(old,tempfile1) == -1
+        echoerr "Can not write to temp file:".tempfile1
+        return
+    endif
+    if writefile(new,tempfile2) == -1
+        echoerr "Can not write to temp file:".tempfile2
+        return
+    endif
+    let diffresult = system('diff '.tempfile1.' '.tempfile2)
+    call s:log("diffresult: ".diffresult)
+    if delete(tempfile1) != 0
+        echoerr "Can not delete temp file:".tempfile1
+        return
+    endif
+    if delete(tempfile2) != 0
+        echoerr "Can not delete temp file:".tempfile2
+        return
+    endif
+    call append(0,split(diffresult,"\n"))
+    call append(0,'- seq: '.a:seq.' -')
+
+    "remove the last empty line
+    call s:exec('$d _')
+    setlocal nomodifiable
+    call t:undotree.SetFocus()
+endfunction
+
+function! s:diffpanel.Init()
+    let self.bufname = "diffpanel_".s:cntr
+    " Increase to make it unique.
+    let s:cntr = s:cntr + 1
+endfunction
+
+function! s:diffpanel.Toggle()
+    call s:log(self.bufname." Toggle()")
+    if self.IsVisible()
+        call self.Hide()
+    else
+        call self.Show()
+    endif
+endfunction
+
+function! s:diffpanel.Show()
+    call s:log("diffpanel.Show()")
+    if self.IsVisible()
+        return
+    endif
+    " Create diffpanel window.
+    call t:undotree.SetFocus() "can not exist without undotree
+
+    let sb_bak = &splitbelow
+    let ei_bak= &eventignore
+    set splitbelow
+    set eventignore=all
+
+    let cmd = g:undotree_diffpanelHeight.'new '.self.bufname
+    exec cmd
+
+    setlocal winfixwidth
+    setlocal winfixheight
+    setlocal noswapfile
+    setlocal buftype=nowrite
+    setlocal bufhidden=delete
+    setlocal nowrap
+    setlocal foldcolumn=0
+    setlocal nobuflisted
+    setlocal nospell
+    setlocal nonumber
+    setlocal nocursorline
+    setlocal nomodifiable
+
+    let &eventignore = ei_bak
+    let &splitbelow = sb_bak
+
+    " syntax need filetype autocommand
+    setfiletype diff
+    call self.BindAu()
+    call t:undotree.SetFocus()
+endfunction
+
+function! s:diffpanel.BindAu()
+    " Auto exit if it's the last window or undotree closed.
+    au WinEnter <buffer> if !t:undotree.IsTargetVisible() |
+                \call t:undotree.Hide() | call t:diffpanel.Hide() | endif
+endfunction
+"=================================================
 " It will set the target of undotree window to the current editing buffer.
+function! s:undotreeAction(action)
+    call s:log("undotreeAction()")
+    if type(gettabvar(tabpagenr(),'undotree')) != type(s:undotree)
+        echoerr "Fatal: t:undotree does not exists!"
+        return
+    endif
+    call t:undotree.Action(a:action)
+endfunction
+
 function! UndotreeUpdate()
     call s:log(">>>>>>> UndotreeUpdate()")
     if type(gettabvar(tabpagenr(),'undotree')) != type(s:undotree)
         return
     endif
     if &bt != '' "it's nor a normal buffer, could be help, quickfix, etc.
+        return
+    endif
+    if &modifiable == 0 "no modifiable buffer.
         return
     endif
     if mode() != 'n' "not in normal mode, return.
@@ -640,7 +806,7 @@ function! UndotreeUpdate()
     call t:undotree.UpdateTarget()
     call t:undotree.SetFocus()
     call t:undotree.Update()
-    call t:undotree.RestoreFocus()
+    call t:undotree.SetTargetFocus()
     call s:log("<<< UndotreeUpdate() leave")
 endfunction
 
@@ -648,21 +814,15 @@ function! UndotreeToggle()
     call s:log(">>> UndotreeToggle()")
     if type(gettabvar(tabpagenr(),'undotree')) != type(s:undotree)
         let t:undotree = s:new(s:undotree)
+        let t:diffpanel = s:new(s:diffpanel)
     endif
     call t:undotree.Toggle()
     call s:log("<<< UndotreeToggle() leave")
 endfunction
 
-function! s:undotreeAction(action)
-    call s:log("undotreeAction()")
-    if type(gettabvar(tabpagenr(),'undotree')) != type(s:undotree)
-        echoerr "Fatal: t:undotree does not exists!"
-        return
-    endif
-    call t:undotree.Action(a:action)
-endfunction
 
-let s:auEvents = "InsertEnter,InsertLeave,WinEnter,WinLeave,CursorMoved"
+"let s:auEvents = "InsertEnter,InsertLeave,WinEnter,WinLeave,CursorMoved"
+let s:auEvents = "InsertLeave,CursorMoved"
 exec "au ".s:auEvents." * call UndotreeUpdate()"
 
 "=================================================

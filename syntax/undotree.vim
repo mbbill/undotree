@@ -21,12 +21,12 @@ syn match UndotreeHelp '^".*$' contains=UndotreeHelpKey
 syn match UndotreeHelpKey '^" \zs.\{-}\ze:' contained
 
 hi link UndotreeNode Question
-hi link UndotreeNodeCurrent CursorLineNr
+hi link UndotreeNodeCurrent Statement
 hi link UndotreeTime Underlined
 hi link UndotreeFirstNode Function
 hi link UndotreeBranch Constant
 hi link UndotreeSeq Comment
-hi link UndotreeCurrent CursorLineNr
+hi link UndotreeCurrent Statement
 hi link UndotreeNext Type
 hi link UndotreeHead Identifier
 hi link UndotreeHelp Comment
