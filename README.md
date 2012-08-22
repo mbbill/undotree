@@ -49,6 +49,7 @@ https://github.com/mbbill/undotree/issues
 
 ### Debug
  1. Create a file under $HOME with the name `undotree_debug.log`
+    * `$touch ~/undotree_debug.log`
  1. Run vim, and the log will automatically be appended to the file, and you may watch it using `tail`:
     * `$tail -F ~/undotree_debug.log`
  1. If you want to disable debug, just delete that file.
