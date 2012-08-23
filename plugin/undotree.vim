@@ -4,12 +4,8 @@
 " Author: Ming Bai <mbbill@gmail.com>
 " License: BSD
 
-" TODO diff panel
-" TODO diff cache
 " TODO remember split size.
 " TODO status line.
-" TODO fix diff update cause cursor move.
-" TODO do not redraw if last_seq not increased.
 
 " At least version 7.0 is needed for undo branches.
 if v:version < 700
@@ -39,7 +35,7 @@ endif
 
 " auto open diff window
 if !exists('g:undotree_diffAutoOpen')
-    let g:undotree_diffAutoOpen = 0
+    let g:undotree_diffAutoOpen = 1
 endif
 
 "=================================================
@@ -232,6 +228,7 @@ function! s:undotree.ActionInTarget(cmd)
     endif
     call s:exec(a:cmd)
     call self.Update()
+    " Update not always set current focus.
     call self.SetFocus()
 endfunction
 
@@ -269,9 +266,13 @@ endfunction
 
 function! s:undotree.ActionDiffToggle()
     call t:diffpanel.Toggle()
+    if t:diffpanel.IsVisible()
+        call t:diffpanel.Update(self.seq_cur,self.targetBufname)
+    endif
 endfunction
 
 function! s:undotree.UpdateDiff()
+    call s:log("undotree.UpdateDiff()")
     if !t:diffpanel.IsVisible()
         return
     endif
@@ -282,7 +283,7 @@ function! s:undotree.UpdateDiff()
     " -1: invalid node.
     "  0: no parent node.
     " >0: assume that seq>0 always has parent.
-    if (self.asciimeta[index].seq) <= 0
+    if (self.asciimeta[index].seq) < 0
         return
     endif
     call t:diffpanel.Update(self.asciimeta[index].seq,self.targetBufname)
@@ -356,6 +357,7 @@ function! s:undotree.Show()
     call self.MarkSeqs()
     if g:undotree_diffAutoOpen
         call t:diffpanel.Show()
+        call self.UpdateDiff()
     endif
     if !g:undotree_SetFocusWhenToggle
         call self.SetTargetFocus()
@@ -388,8 +390,14 @@ function! s:undotree.Update()
             call s:log("undotree.Update() update seqs")
             let self.rawtree = newrawtree
             call self.ConvertInput(0) "only update seqs.
+            if (self.seq_cur == self.seq_cur_bak) &&
+                        \(self.seq_curhead == self.seq_curhead_bak)&&
+                        \(self.seq_newhead == self.seq_newhead_bak)
+                return
+            endif
             call self.SetFocus()
             call self.MarkSeqs()
+            call self.UpdateDiff()
             return
         endif
     endif
@@ -446,9 +454,9 @@ endfunction
 " Current window must be undotree.
 function! s:undotree.Draw()
     " remember the current cursor position.
-    let linePos = line('.') "Line number of cursor
+    let cursorPos = getpos('.') "position of cursor
     call s:exec('normal! H')
-    let topPos = line('.') "Line number of the first line in screen.
+    let topPos = getpos('.') "position of the first line in screen.
 
     setlocal modifiable
     " Delete text into blackhole register.
@@ -461,9 +469,9 @@ function! s:undotree.Draw()
     call s:exec('$d _')
 
     " restore previous cursor position.
-    call s:exec("normal! " . topPos . "G")
+    call setpos('.',topPos)
     normal! zt
-    call s:exec("normal! " . linePos . "G")
+    call setpos('.',cursorPos)
 
     setlocal nomodifiable
 endfunction
@@ -760,47 +768,67 @@ let s:diffpanel = s:new(s:panel)
 function! s:diffpanel.Update(seq,targetBufname)
     call s:log('diffpanel.Update(),seq:'.a:seq.' bufname:'.a:targetBufname)
     " TODO check seq if cache hit.
+    let diffresult = []
 
-    let ei_bak = &eventignore
-    set eventignore=all
-
-    let winnr = bufwinnr(a:targetBufname)
-    if winnr == -1
-        return
+    if a:seq == 0
+        let diffresult = []
     else
-        exec winnr." wincmd w"
-    endif
-    let new = getbufline(a:targetBufname,'^','$')
-    undo
-    let old = getbufline(a:targetBufname,'^','$')
-    redo
+        if has_key(self.cache,a:targetBufname.a:seq)
+            call s:log("diff cache hit.")
+            let diffresult = self.cache[a:targetBufname.a:seq]
+        else
+            let ei_bak = &eventignore
+            set eventignore=all
 
-    let &eventignore = ei_bak
+            let winnr = bufwinnr(a:targetBufname)
+            if winnr == -1
+                return
+            else
+                exec winnr." wincmd w"
+            endif
+            " remember and restore cursor and window position.
+            let cursorPos = getpos('.')
+            call s:exec('normal! H')
+            let topPos = getpos('.')
+
+            let new = getbufline(a:targetBufname,'^','$')
+            silent undo
+            let old = getbufline(a:targetBufname,'^','$')
+            silent redo
+
+            call setpos('.',topPos)
+            normal! zt
+            call setpos('.',cursorPos)
+
+            " diff files.
+            let tempfile1 = tempname()
+            let tempfile2 = tempname()
+            if writefile(old,tempfile1) == -1
+                echoerr "Can not write to temp file:".tempfile1
+            endif
+            if writefile(new,tempfile2) == -1
+                echoerr "Can not write to temp file:".tempfile2
+            endif
+            let diffresult = split(system('diff '.tempfile1.' '.tempfile2),"\n")
+            call s:log("diffresult: ".string(diffresult))
+            if delete(tempfile1) != 0
+                echoerr "Can not delete temp file:".tempfile1
+            endif
+            if delete(tempfile2) != 0
+                echoerr "Can not delete temp file:".tempfile2
+            endif
+            let &eventignore = ei_bak
+            "Update cache
+            let self.cache[a:targetBufname.a:seq] = diffresult
+        endif
+    endif
 
     call self.SetFocus()
+
     setlocal modifiable
     call s:exec('1,$ d _')
-    let tempfile1 = tempname()
-    let tempfile2 = tempname()
-    if writefile(old,tempfile1) == -1
-        echoerr "Can not write to temp file:".tempfile1
-        return
-    endif
-    if writefile(new,tempfile2) == -1
-        echoerr "Can not write to temp file:".tempfile2
-        return
-    endif
-    let diffresult = system('diff '.tempfile1.' '.tempfile2)
-    call s:log("diffresult: ".diffresult)
-    if delete(tempfile1) != 0
-        echoerr "Can not delete temp file:".tempfile1
-        return
-    endif
-    if delete(tempfile2) != 0
-        echoerr "Can not delete temp file:".tempfile2
-        return
-    endif
-    call append(0,split(diffresult,"\n"))
+
+    call append(0,diffresult)
     call append(0,'- seq: '.a:seq.' -')
 
     "remove the last empty line
@@ -811,6 +839,7 @@ endfunction
 
 function! s:diffpanel.Init()
     let self.bufname = "diffpanel_".s:cntr
+    let self.cache = {}
     " Increase to make it unique.
     let s:cntr = s:cntr + 1
 endfunction
@@ -831,6 +860,10 @@ function! s:diffpanel.Show()
     endif
     " Create diffpanel window.
     call t:undotree.SetFocus() "can not exist without undotree
+    " remember and restore cursor and window position.
+    let cursorPos = getpos('.')
+    call s:exec('normal! H')
+    let topPos = getpos('.')
 
     let sb_bak = &splitbelow
     let ei_bak= &eventignore
@@ -838,7 +871,7 @@ function! s:diffpanel.Show()
     set eventignore=all
 
     let cmd = g:undotree_diffpanelHeight.'new '.self.bufname
-    exec cmd
+    silent exec cmd
 
     setlocal winfixwidth
     setlocal winfixheight
@@ -860,11 +893,15 @@ function! s:diffpanel.Show()
     setfiletype diff
     call self.BindAu()
     call t:undotree.SetFocus()
+    call setpos('.',topPos)
+    normal! zt
+    call setpos('.',cursorPos)
 endfunction
 
 function! s:diffpanel.BindAu()
     " Auto exit if it's the last window or undotree closed.
-    au WinEnter <buffer> if !t:undotree.IsTargetVisible() |
+    au WinEnter <buffer> if !t:undotree.IsTargetVisible() ||
+                \!t:undotree.IsVisible() |
                 \call t:undotree.Hide() | call t:diffpanel.Hide() | endif
 endfunction
 "=================================================
@@ -883,14 +920,14 @@ function! UndotreeUpdate()
     if type(gettabvar(tabpagenr(),'undotree')) != type(s:undotree)
         return
     endif
-    call s:log(">>> UndotreeUpdate()")
+    call s:log('>>> UndotreeUpdate()')
     let thisbuf = bufname('%')
     call t:undotree.Update()
     " focus moved
     if bufname('%') != thisbuf
         call t:undotree.SetTargetFocus()
     endif
-    call s:log("<<< UndotreeUpdate() leave")
+    call s:log('<<< UndotreeUpdate() leave')
 endfunction
 
 function! UndotreeToggle()
