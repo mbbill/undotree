@@ -5,11 +5,11 @@
 " License: BSD
 
 " TODO diff panel
+" TODO diff cache
 " TODO remember split size.
 " TODO status line.
 " TODO fix diff update cause cursor move.
 " TODO do not redraw if last_seq not increased.
-" TODO undotree() cache
 
 " At least version 7.0 is needed for undo branches.
 if v:version < 700
@@ -177,7 +177,6 @@ function! s:undotree.Init()
     let self.rawtree = {}  "data passed from undotree()
     let self.tree = {}     "data converted to internal format.
     let self.seq_last = -1
-    "let self.nodelist = {} "stores an ordered list of items points to self.tree
 
     " seqs
     let self.seq_cur = -1
@@ -189,12 +188,9 @@ function! s:undotree.Init()
     let self.seq_curhead_bak = -1
     let self.seq_newhead_bak = -1
 
-    "let self.currentseq = -1  "current node is the latest.
-
     let self.asciitree = []     "output data.
     let self.asciimeta = []     "meta data behind ascii tree.
     let self.seq2index = {}     "table used to convert seq to index.
-    "let self.currentIndex = -1 "line of the current node in ascii tree.
     let self.showHelp = 0
 endfunction
 
@@ -213,7 +209,7 @@ endfunction
 function! s:undotree.Action(action)
     call s:log("undotree.Action() ".a:action)
     if !self.IsVisible() || bufname("%") != self.bufname
-        "echoerr "Fatal: window does not exists."
+        echoerr "Fatal: window does not exists."
         return
     endif
     if !has_key(self,'Action'.a:action)
@@ -226,6 +222,7 @@ endfunction
 function! s:undotree.ActionHelp()
     let self.showHelp = !self.showHelp
     call self.Draw()
+    call self.MarkSeqs()
 endfunction
 
 " Helper function, do action in target window, and then update itself.
@@ -234,9 +231,8 @@ function! s:undotree.ActionInTarget(cmd)
         return
     endif
     call s:exec(a:cmd)
-    "call self.UpdateTarget()
-    "call self.SetFocus()
     call self.Update()
+    call self.SetFocus()
 endfunction
 
 function! s:undotree.ActionEnter()
@@ -244,7 +240,12 @@ function! s:undotree.ActionEnter()
     if index < 0
         return
     endif
-    if (self.asciimeta[index].seq) == -1
+    let seq = self.asciimeta[index].seq
+    if seq == -1
+        return
+    endif
+    if seq == 0
+        call self.ActionInTarget('norm 9999u')
         return
     endif
     call self.ActionInTarget('u '.self.asciimeta[index].seq)
@@ -348,7 +349,7 @@ function! s:undotree.Show()
 
     call self.BindKey()
     call self.BindAu()
-    " why refresh twice here?
+
     call self.ConvertInput(1)
     call self.Render()
     call self.Draw()
@@ -394,12 +395,12 @@ function! s:undotree.Update()
     endif
     call s:log("undotree.Update() update whole tree")
 
-    "let self.currentseq = -1
-    "let self.nodelist = {}
-    "let self.currentIndex = -1
     let self.targetBufname = bufname('%')
     let self.rawtree = undotree()
     let self.seq_last = self.rawtree.seq_last
+    let self.seq_cur = -1
+    let self.seq_curhead = -1
+    let self.seq_newhead = -1
     call self.ConvertInput(1) "update all.
     call self.Render()
     call self.SetFocus()
@@ -407,12 +408,6 @@ function! s:undotree.Update()
     call self.MarkSeqs()
     call self.UpdateDiff()
 endfunction
-
-" execute this in target window.
-"function! s:undotree.UpdateTarget()
-"    let self.targetBufname = bufname("%") "current buffer
-"    let self.rawtree = undotree()
-"endfunction
 
 function! s:undotree.AppendHelp()
     call append(0,'') "empty line
@@ -486,23 +481,24 @@ function! s:undotree.MarkSeqs()
     " reset bak seq lines.
     if self.seq_cur_bak != -1
         let index = self.seq2index[self.seq_cur_bak]
-        let linetext = self.asciitree[index]
-        let lineNr = self.Index2Screen(index)
-        call setline(lineNr,linetext)
+        call setline(self.Index2Screen(index),self.asciitree[index])
     endif
     if self.seq_curhead_bak != -1
         let index = self.seq2index[self.seq_curhead_bak]
-        let linetext = self.asciitree[index]
-        let lineNr = self.Index2Screen(index)
-        call setline(lineNr,linetext)
+        call setline(self.Index2Screen(index),self.asciitree[index])
     endif
     if self.seq_newhead_bak != -1
         let index = self.seq2index[self.seq_newhead_bak]
-        let linetext = self.asciitree[index]
-        let lineNr = self.Index2Screen(index)
-        call setline(lineNr,linetext)
+        call setline(self.Index2Screen(index),self.asciitree[index])
     endif
     " mark new seqs.
+    if self.seq_cur != -1
+        let lineNr = self.Index2Screen(self.seq2index[self.seq_cur])
+        call setline(lineNr,substitute(getline(lineNr),
+                    \' \(\d\+\) ','>\1<',''))
+        " move cursor to that line.
+        call s:exec("normal! " . lineNr . "G")
+    endif
     if self.seq_curhead != -1
         let lineNr = self.Index2Screen(self.seq2index[self.seq_curhead])
         call setline(lineNr,substitute(getline(lineNr),
@@ -513,13 +509,6 @@ function! s:undotree.MarkSeqs()
         call setline(lineNr,substitute(getline(lineNr),
                     \' \(\d\+\) ','[\1]',''))
     endif
-    if self.seq_cur != -1
-        let lineNr = self.Index2Screen(self.seq2index[self.seq_cur])
-        call setline(lineNr,substitute(getline(lineNr),
-                    \' \(\d\+\) ','>\1<',''))
-        " move cursor to that line.
-        call s:exec("normal! " . lineNr . "G")
-    endif
     setlocal nomodifiable
 endfunction
 
@@ -529,10 +518,7 @@ let s:node = {}
 function! s:node.Init()
     let self.seq = -1
     let self.p = []
-    "let self.newhead = 0
-    "let self.curhead = 0
     let self.time = -1
-    "let self.curpos = 0 " =1 if this node is the current one
 endfunction
 
 function! s:undotree._parseNode(in,out)
@@ -550,18 +536,11 @@ function! s:undotree._parseNode(in,out)
         let newnode.time = i.time
         if has_key(i,'newhead')
             let self.seq_newhead = i.seq
-            "let newnode.newhead = i.newhead
         endif
         if has_key(i,'curhead')
-            "let newnode.curhead = i.curhead
-            "let curnode.curpos = 1
             let self.seq_curhead = i.seq
             let self.seq_cur = curnode.seq
-            " See 'Note' below.
-            "let self.currentseq = curnode.seq
         endif
-        "endif
-        "let self.nodelist[newnode.seq] = newnode
         call extend(curnode.p,[newnode])
         let curnode = newnode
     endfor
@@ -586,9 +565,6 @@ function! s:undotree.ConvertInput(updatetree)
     let root.seq = 0
     let root.time = 0
 
-    "Add root node to list, we need a sorted list to calculate current node index.
-    "let self.nodelist[self.tree.seq] = self.tree
-
     call self._parseNode(self.rawtree.entries,root)
 
     " Note: Normally, the current node should be the one that seq_cur points to,
@@ -597,7 +573,6 @@ function! s:undotree.ConvertInput(updatetree)
     " seq_cur.
     if self.seq_cur == -1
         let self.seq_cur = self.rawtree.seq_cur
-        "let self.nodelist[self.currentseq].curpos = 1
     endif
     if a:updatetree
         let self.tree = root
@@ -645,7 +620,6 @@ function! s:undotree.Render()
     " let tree = deepcopy(self.tree)
     let tree = self.tree
     let slots = [tree]
-    "let curr_seq = 0
     let out = []
     let outmeta = []
     let seq2index = {}
@@ -719,27 +693,8 @@ function! s:undotree.Render()
                     let newline = newline.'| '
                 endif
             endfor
-            " append meta info.
-            "let padding = ''
-            "let newline = newline . padding
-            "if node.curpos
-            "    let newline = newline.'>'.(node.seq).'< '.
-            "                \s:gettime(node.time)
-            "    let self.currentIndex = len(out) + 1
-            "else
-            "    if node.newhead
-            "        let newline = newline.'['.(node.seq).'] '.
-            "                    \s:gettime(node.time)
-            "    else
-            "        if node.curhead
-            "            let newline = newline.'{'.(node.seq).'} '.
-            "                        \s:gettime(node.time)
-            "        else
-                        let newline = newline.' '.(node.seq).'  '.
-                                    \s:gettime(node.time)
-            "        endif
-            "    endif
-            "endif
+            let newline = newline.' '.(node.seq).'  '.
+                        \s:gettime(node.time)
             " update the printed slot to its child.
             if len(node.p) == 0
                 let slots[index] = 'x'
@@ -796,7 +751,6 @@ function! s:undotree.Render()
         let seq2index[i] = totallen - 1 - seq2index[i]
     endfor
     let self.seq2index = seq2index
-    "let self.currentIndex = len(out) - self.currentIndex
 endfunction
 
 "=================================================
