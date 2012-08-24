@@ -8,6 +8,7 @@
 " TODO status line.
 " TODO Diff between 2 specific revisions.
 " TODO clear undo history.
+" TODO support horizontal split.
 
 " At least version 7.0 is needed for undo branches.
 if v:version < 700
@@ -177,6 +178,7 @@ function! s:undotree.Init()
     " Increase to make it unique.
     let s:cntr = s:cntr + 1
     let self.width = g:undotree_SplitWidth
+    let self.opendiff = g:undotree_diffAutoOpen
     let self.targetBufnr = -1
     let self.rawtree = {}  "data passed from undotree()
     let self.tree = {}     "data converted to internal format.
@@ -275,6 +277,7 @@ function! s:undotree.ActionGoup()
 endfunction
 
 function! s:undotree.ActionDiffToggle()
+    let self.opendiff = !self.opendiff
     call t:diffpanel.Toggle()
     call self.UpdateDiff()
 endfunction
@@ -353,7 +356,7 @@ function! s:undotree.Show()
     call self.Render()
     call self.Draw()
     call self.MarkSeqs()
-    if g:undotree_diffAutoOpen
+    if self.opendiff
         call t:diffpanel.Show()
         call self.UpdateDiff()
     endif
