@@ -15,6 +15,11 @@ if v:version < 700
      finish
 endif
 
+" tree node shape.
+if !exists('g:undotree_TreeNodeShape')
+    let g:undotree_TreeNodeShape = '*'
+endif
+
 " split window location, could also be topright
 if !exists('g:undotree_SplitLocation')
     let g:undotree_SplitLocation = 'topleft'
@@ -209,9 +214,11 @@ endfunction
 
 function! s:undotree.BindAu()
     " Auto exit if it's the last window
-    au Bufenter <buffer> if !t:undotree.IsTargetVisible() |
+    au Bufenter <buffer> if type(gettabvar(tabpagenr(),'undotree')) == type(s:undotree)
+                \&& !t:undotree.IsTargetVisible() |
                 \call t:undotree.Hide() | call t:diffpanel.Hide() | endif
-    au BufEnter <buffer> let t:undotree.width = winwidth(winnr())
+    au Bufenter <buffer> if type(gettabvar(tabpagenr(),'undotree')) == type(s:undotree) |
+                \let t:undotree.width = winwidth(winnr()) | endif
 endfunction
 
 function! s:undotree.Action(action)
@@ -712,7 +719,7 @@ function! s:undotree.Render()
             let seq2index[node.seq]=len(out)
             for i in range(len(slots))
                 if index == i
-                    let newline = newline.'* '
+                    let newline = newline.g:undotree_TreeNodeShape.' '
                 else
                     let newline = newline.'| '
                 endif
@@ -923,8 +930,9 @@ endfunction
 
 function! s:diffpanel.BindAu()
     " Auto exit if it's the last window or undotree closed.
-    au BufEnter <buffer> if !t:undotree.IsTargetVisible() ||
-                \!t:undotree.IsVisible() |
+    au Bufenter <buffer> if type(gettabvar(tabpagenr(),'undotree')) == type(s:undotree)
+                \&& (!t:undotree.IsTargetVisible() ||
+                \!t:undotree.IsVisible()) |
                 \call t:undotree.Hide() | call t:diffpanel.Hide() | endif
 endfunction
 "=================================================
