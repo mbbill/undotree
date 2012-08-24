@@ -748,18 +748,18 @@ function! s:undotree.Render()
             call remove(slots,index)
             if len(node) == 2
                 if node[0].seq > node[1].seq
-                    call insert(slots,node[0],index)
                     call insert(slots,node[1],index)
+                    call insert(slots,node[0],index)
                 else
-                    call insert(slots,node[1],index)
                     call insert(slots,node[0],index)
+                    call insert(slots,node[1],index)
                 endif
             endif
-            " split P to E+P if elements in p > 2
+            " split P to P+E if elements in p > 2
             if len(node) > 2
                 call insert(slots,node[0],index)
                 call remove(node,0)
-                call insert(slots,node,index+1)
+                call insert(slots,node,index)
             endif
         endif
         unlet node
@@ -784,7 +784,9 @@ let s:diffpanel = s:new(s:panel)
 
 function! s:diffpanel.Update(seq,targetBufnr)
     call s:log('diffpanel.Update(),seq:'.a:seq.' bufname:'.bufname(a:targetBufnr))
-    " TODO check seq if cache hit.
+    if !self.diffexecutable
+        return
+    endif
     let diffresult = []
 
     if a:seq == 0
@@ -858,6 +860,10 @@ endfunction
 function! s:diffpanel.Init()
     let self.bufname = "diffpanel_".s:cntr
     let self.cache = {}
+    let self.diffexecutable = executable('diff')
+    if !self.diffexecutable
+        echoerr '"diff" is not executable.'
+    endif
     " Increase to make it unique.
     let s:cntr = s:cntr + 1
 endfunction
