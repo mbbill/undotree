@@ -209,6 +209,7 @@ function! s:undotree.BindAu()
     " Auto exit if it's the last window
     au WinEnter <buffer> if !t:undotree.IsTargetVisible() |
                 \call t:undotree.Hide() | call t:diffpanel.Hide() | endif
+    au WinEnter <buffer> let t:undotree.width = winwidth(winnr())
 endfunction
 
 function! s:undotree.Action(action)
