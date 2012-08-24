@@ -177,7 +177,7 @@ function! s:undotree.Init()
     " Increase to make it unique.
     let s:cntr = s:cntr + 1
     let self.width = g:undotree_SplitWidth
-    let self.targetBufname = ''
+    let self.targetBufnr = -1
     let self.rawtree = {}  "data passed from undotree()
     let self.tree = {}     "data converted to internal format.
     let self.seq_last = -1
@@ -276,9 +276,7 @@ endfunction
 
 function! s:undotree.ActionDiffToggle()
     call t:diffpanel.Toggle()
-    if t:diffpanel.IsVisible()
-        call t:diffpanel.Update(self.seq_cur,self.targetBufname)
-    endif
+    call self.UpdateDiff()
 endfunction
 
 function! s:undotree.UpdateDiff()
@@ -286,21 +284,11 @@ function! s:undotree.UpdateDiff()
     if !t:diffpanel.IsVisible()
         return
     endif
-    let index = self.Screen2Index(line('.'))
-    if index < 0
-        return
-    endif
-    " -1: invalid node.
-    "  0: no parent node.
-    " >0: assume that seq>0 always has parent.
-    if (self.asciimeta[index].seq) < 0
-        return
-    endif
-    call t:diffpanel.Update(self.asciimeta[index].seq,self.targetBufname)
+    call t:diffpanel.Update(self.seq_cur,self.targetBufnr)
 endfunction
 
 function! s:undotree.IsTargetVisible()
-    if bufwinnr(self.targetBufname) != -1
+    if bufwinnr(self.targetBufnr) != -1
         return 1
     else
         return 0
@@ -309,8 +297,8 @@ endfunction
 
 " May fail due to target window closed.
 function! s:undotree.SetTargetFocus()
-    let winnr = bufwinnr(self.targetBufname)
-    call s:log("undotree.SetTargetFocus() winnr:".winnr." targetBufname:".self.targetBufname)
+    let winnr = bufwinnr(self.targetBufnr)
+    call s:log("undotree.SetTargetFocus() winnr:".winnr." targetBufname:".bufname(self.targetBufnr))
     if winnr == -1
         return 0
     else
@@ -336,7 +324,7 @@ function! s:undotree.Show()
     endif
 
     " store info for the first update.
-    let self.targetBufname = bufname('%')
+    let self.targetBufnr = bufnr('%')
     let self.rawtree = undotree()
     let self.seq_last = self.rawtree.seq_last
 
@@ -389,7 +377,7 @@ function! s:undotree.Update()
         return
     endif
     "update undotree,set focus
-    if self.targetBufname == bufname('%')
+    if self.targetBufnr == bufnr('%')
         let newrawtree = undotree()
         if self.rawtree == newrawtree
             return
@@ -413,7 +401,7 @@ function! s:undotree.Update()
     endif
     call s:log("undotree.Update() update whole tree")
 
-    let self.targetBufname = bufname('%')
+    let self.targetBufnr = bufnr('%')
     let self.rawtree = undotree()
     let self.seq_last = self.rawtree.seq_last
     let self.seq_cur = -1
@@ -788,22 +776,22 @@ endfunction
 "diff panel
 let s:diffpanel = s:new(s:panel)
 
-function! s:diffpanel.Update(seq,targetBufname)
-    call s:log('diffpanel.Update(),seq:'.a:seq.' bufname:'.a:targetBufname)
+function! s:diffpanel.Update(seq,targetBufnr)
+    call s:log('diffpanel.Update(),seq:'.a:seq.' bufname:'.bufname(a:targetBufnr))
     " TODO check seq if cache hit.
     let diffresult = []
 
     if a:seq == 0
         let diffresult = []
     else
-        if has_key(self.cache,a:targetBufname.a:seq)
+        if has_key(self.cache,a:targetBufnr.'_'.a:seq)
             call s:log("diff cache hit.")
-            let diffresult = self.cache[a:targetBufname.a:seq]
+            let diffresult = self.cache[a:targetBufnr.'_'.a:seq]
         else
             let ei_bak = &eventignore
             set eventignore=all
 
-            let winnr = bufwinnr(a:targetBufname)
+            let winnr = bufwinnr(a:targetBufnr)
             if winnr == -1
                 return
             else
@@ -814,9 +802,9 @@ function! s:diffpanel.Update(seq,targetBufname)
             call s:exec('normal! H')
             let topPos = getpos('.')
 
-            let new = getbufline(a:targetBufname,'^','$')
+            let new = getbufline(a:targetBufnr,'^','$')
             silent undo
-            let old = getbufline(a:targetBufname,'^','$')
+            let old = getbufline(a:targetBufnr,'^','$')
             silent redo
 
             call setpos('.',topPos)
@@ -842,7 +830,7 @@ function! s:diffpanel.Update(seq,targetBufname)
             endif
             let &eventignore = ei_bak
             "Update cache
-            let self.cache[a:targetBufname.a:seq] = diffresult
+            let self.cache[a:targetBufnr.'_'.a:seq] = diffresult
         endif
     endif
 
@@ -945,10 +933,10 @@ function! UndotreeUpdate()
         return
     endif
     call s:log('>>> UndotreeUpdate()')
-    let thisbuf = bufname('%')
+    let thisbuf = bufnr('%')
     call t:undotree.Update()
     " focus moved
-    if bufname('%') != thisbuf
+    if bufnr('%') != thisbuf
         call t:undotree.SetTargetFocus()
     endif
     call s:log('<<< UndotreeUpdate() leave')
