@@ -209,9 +209,9 @@ endfunction
 
 function! s:undotree.BindAu()
     " Auto exit if it's the last window
-    au WinEnter <buffer> if !t:undotree.IsTargetVisible() |
+    au Bufenter <buffer> if !t:undotree.IsTargetVisible() |
                 \call t:undotree.Hide() | call t:diffpanel.Hide() | endif
-    au WinEnter <buffer> let t:undotree.width = winwidth(winnr())
+    au BufEnter <buffer> let t:undotree.width = winwidth(winnr())
 endfunction
 
 function! s:undotree.Action(action)
@@ -712,13 +712,12 @@ function! s:undotree.Render()
             let seq2index[node.seq]=len(out)
             for i in range(len(slots))
                 if index == i
-                    "let newline = newline.(node.seq)." "
                     let newline = newline.'* '
                 else
                     let newline = newline.'| '
                 endif
             endfor
-            let newline = newline.' '.(node.seq).'  '.
+            let newline = newline.'  '.(node.seq).'  '.
                         \s:gettime(node.time)
             " update the printed slot to its child.
             if len(node.p) == 0
@@ -924,7 +923,7 @@ endfunction
 
 function! s:diffpanel.BindAu()
     " Auto exit if it's the last window or undotree closed.
-    au WinEnter <buffer> if !t:undotree.IsTargetVisible() ||
+    au BufEnter <buffer> if !t:undotree.IsTargetVisible() ||
                 \!t:undotree.IsVisible() |
                 \call t:undotree.Hide() | call t:diffpanel.Hide() | endif
 endfunction
