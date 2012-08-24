@@ -45,8 +45,14 @@ endif
 let s:cntr = 0
 
 " Help text
-let s:helpmore = ['" Undotree quick help',
-            \'" -------------------']
+let s:helpmore = ['" Marks:',
+            \'" --------------------',
+            \'" >num< : current change',
+            \'" {num} : change that will be redo',
+            \'" [num] : the last change',
+            \'" -num- : saved changes',
+            \'" Hotkeys:',
+            \'" --------------------']
 let s:helpless = ['" Press ? for help.']
 
 " Keymap
@@ -180,6 +186,7 @@ function! s:undotree.Init()
     let self.seq_cur = -1
     let self.seq_curhead = -1
     let self.seq_newhead = -1
+    let self.seq_saved = []
 
     "backup, for mark
     let self.seq_cur_bak = -1
@@ -502,22 +509,31 @@ function! s:undotree.MarkSeqs()
         call setline(self.Index2Screen(index),self.asciitree[index])
     endif
     " mark new seqs.
+    for i in self.seq_saved
+        let index = self.seq2index[i]
+        let lineNr = self.Index2Screen(index)
+        call setline(lineNr,substitute(self.asciitree[index],
+                    \' \(\d\+\) ','-\1-',''))
+    endfor
+    if self.seq_newhead != -1
+        let index = self.seq2index[self.seq_newhead]
+        let lineNr = self.Index2Screen(index)
+        call setline(lineNr,substitute(self.asciitree[index],
+                    \' \(\d\+\) ','[\1]',''))
+    endif
+    if self.seq_curhead != -1
+        let index = self.seq2index[self.seq_curhead]
+        let lineNr = self.Index2Screen(index)
+        call setline(lineNr,substitute(self.asciitree[index],
+                    \' \(\d\+\) ','{\1}',''))
+    endif
     if self.seq_cur != -1
-        let lineNr = self.Index2Screen(self.seq2index[self.seq_cur])
-        call setline(lineNr,substitute(getline(lineNr),
+        let index = self.seq2index[self.seq_cur]
+        let lineNr = self.Index2Screen(index)
+        call setline(lineNr,substitute(self.asciitree[index],
                     \' \(\d\+\) ','>\1<',''))
         " move cursor to that line.
         call s:exec("normal! " . lineNr . "G")
-    endif
-    if self.seq_curhead != -1
-        let lineNr = self.Index2Screen(self.seq2index[self.seq_curhead])
-        call setline(lineNr,substitute(getline(lineNr),
-                    \' \(\d\+\) ','{\1}',''))
-    endif
-    if self.seq_newhead != -1
-        let lineNr = self.Index2Screen(self.seq2index[self.seq_newhead])
-        call setline(lineNr,substitute(getline(lineNr),
-                    \' \(\d\+\) ','[\1]',''))
     endif
     setlocal nomodifiable
 endfunction
@@ -551,6 +567,9 @@ function! s:undotree._parseNode(in,out)
             let self.seq_curhead = i.seq
             let self.seq_cur = curnode.seq
         endif
+        if has_key(i,'save')
+            call extend(self.seq_saved,[i.seq])
+        endif
         call extend(curnode.p,[newnode])
         let curnode = newnode
     endfor
@@ -569,6 +588,7 @@ function! s:undotree.ConvertInput(updatetree)
     let self.seq_cur = -1
     let self.seq_curhead = -1
     let self.seq_newhead = -1
+    let self.seq_saved = []
 
     "Generate root node
     let root = s:new(s:node)
