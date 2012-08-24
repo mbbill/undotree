@@ -6,6 +6,7 @@
 
 " TODO remember split size.
 " TODO status line.
+" TODO Diff between 2 specific revisions.
 
 " At least version 7.0 is needed for undo branches.
 if v:version < 700
@@ -833,6 +834,7 @@ function! s:diffpanel.Update(seq,targetBufname)
 
     "remove the last empty line
     call s:exec('$d _')
+    call s:exec('norm! gg') "move cursor to line 1.
     setlocal nomodifiable
     call t:undotree.SetFocus()
 endfunction
