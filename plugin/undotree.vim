@@ -352,6 +352,9 @@ function! s:undotree.Show()
     call self.BindKey()
     call self.BindAu()
 
+    let self.seq_cur = -1
+    let self.seq_curhead = -1
+    let self.seq_newhead = -1
     call self.ConvertInput(1)
     call self.Render()
     call self.Draw()
