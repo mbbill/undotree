@@ -7,6 +7,7 @@
 " TODO remember split size.
 " TODO status line.
 " TODO Diff between 2 specific revisions.
+" TODO clear undo history.
 
 " At least version 7.0 is needed for undo branches.
 if v:version < 700
