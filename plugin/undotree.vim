@@ -4,10 +4,8 @@
 " Author: Ming Bai <mbbill@gmail.com>
 " License: BSD
 
-" TODO remember split size.
 " TODO status line.
 " TODO Diff between 2 specific revisions.
-" TODO clear undo history.
 " TODO support horizontal split.
 
 " At least version 7.0 is needed for undo branches.
@@ -1016,14 +1014,12 @@ function! UndotreeUpdate()
     if type(gettabvar(tabpagenr(),'undotree')) != type(s:undotree)
         return
     endif
-    call s:log('>>> UndotreeUpdate()')
     let thisbuf = bufnr('%')
     call t:undotree.Update()
     " focus moved
     if bufnr('%') != thisbuf
         call t:undotree.SetTargetFocus()
     endif
-    call s:log('<<< UndotreeUpdate() leave')
 endfunction
 
 function! UndotreeToggle()
