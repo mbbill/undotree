@@ -51,14 +51,13 @@ endif
 let s:cntr = 0
 
 " Help text
-let s:helpmore = ['" Marks:',
-            \'" --------------------',
+let s:helpmore = ['" --= Marks =--',
             \'" >num< : current change',
             \'" {num} : change that will be redo',
             \'" [num] : the last change',
-            \'" -num- : saved changes',
-            \'" Hotkeys:',
-            \'" --------------------']
+            \'"   s   : saved changes',
+            \'"   S   : the last saved change',
+            \'" --= Hotkeys =--']
 let s:helpless = ['" Press ? for help.']
 
 " Keymap
@@ -188,12 +187,14 @@ function! s:undotree.Init()
     let self.rawtree = {}  "data passed from undotree()
     let self.tree = {}     "data converted to internal format.
     let self.seq_last = -1
+    let self.save_last = -1
+    let self.save_last_bak = -1
 
     " seqs
     let self.seq_cur = -1
     let self.seq_curhead = -1
     let self.seq_newhead = -1
-    let self.seq_saved = []
+    let self.seq_saved = {} "{saved value -> seq} pair
 
     "backup, for mark
     let self.seq_cur_bak = -1
@@ -403,7 +404,8 @@ function! s:undotree.Update()
             call self.ConvertInput(0) "only update seqs.
             if (self.seq_cur == self.seq_cur_bak) &&
                         \(self.seq_curhead == self.seq_curhead_bak)&&
-                        \(self.seq_newhead == self.seq_newhead_bak)
+                        \(self.seq_newhead == self.seq_newhead_bak)&&
+                        \(self.save_last == self.save_last_bak)
                 return
             endif
             call self.SetFocus()
@@ -510,32 +512,38 @@ function! s:undotree.MarkSeqs()
         let index = self.seq2index[self.seq_newhead_bak]
         call setline(self.Index2Screen(index),self.asciitree[index])
     endif
-    " mark new seqs.
-    for i in self.seq_saved
-        let index = self.seq2index[i]
+    " mark save seqs
+    for i in keys(self.seq_saved)
+        let index = self.seq2index[self.seq_saved[i]]
         let lineNr = self.Index2Screen(index)
         call setline(lineNr,substitute(self.asciitree[index],
-                    \' \(\d\+\) ','-\1-',''))
+                    \' \d\+  \zs \ze','s',''))
     endfor
-    if self.seq_newhead != -1
-        let index = self.seq2index[self.seq_newhead]
+    let max_saved_num = max(keys(self.seq_saved))
+    if max_saved_num > 0
+        let lineNr = self.Index2Screen(self.seq2index[self.seq_saved[max_saved_num]])
+        call setline(lineNr,substitute(getline(lineNr),'s','S',''))
+    endif
+    " mark new seqs.
+    if self.seq_cur != -1
+        let index = self.seq2index[self.seq_cur]
         let lineNr = self.Index2Screen(index)
-        call setline(lineNr,substitute(self.asciitree[index],
-                    \' \(\d\+\) ','[\1]',''))
+        call setline(lineNr,substitute(getline(lineNr),
+                    \' \(\d\+\) ','>\1<',''))
+        " move cursor to that line.
+        call s:exec("normal! " . lineNr . "G")
     endif
     if self.seq_curhead != -1
         let index = self.seq2index[self.seq_curhead]
         let lineNr = self.Index2Screen(index)
-        call setline(lineNr,substitute(self.asciitree[index],
+        call setline(lineNr,substitute(getline(lineNr),
                     \' \(\d\+\) ','{\1}',''))
     endif
-    if self.seq_cur != -1
-        let index = self.seq2index[self.seq_cur]
+    if self.seq_newhead != -1
+        let index = self.seq2index[self.seq_newhead]
         let lineNr = self.Index2Screen(index)
-        call setline(lineNr,substitute(self.asciitree[index],
-                    \' \(\d\+\) ','>\1<',''))
-        " move cursor to that line.
-        call s:exec("normal! " . lineNr . "G")
+        call setline(lineNr,substitute(getline(lineNr),
+                    \' \(\d\+\) ','[\1]',''))
     endif
     setlocal nomodifiable
 endfunction
@@ -570,7 +578,7 @@ function! s:undotree._parseNode(in,out)
             let self.seq_cur = curnode.seq
         endif
         if has_key(i,'save')
-            call extend(self.seq_saved,[i.seq])
+            let self.seq_saved[i.save] = i.seq
         endif
         call extend(curnode.p,[newnode])
         let curnode = newnode
@@ -586,11 +594,12 @@ function! s:undotree.ConvertInput(updatetree)
     let self.seq_cur_bak = self.seq_cur
     let self.seq_curhead_bak = self.seq_curhead
     let self.seq_newhead_bak = self.seq_newhead
+    let self.save_last_bak = self.save_last
 
     let self.seq_cur = -1
     let self.seq_curhead = -1
     let self.seq_newhead = -1
-    let self.seq_saved = []
+    let self.seq_saved = {}
 
     "Generate root node
     let root = s:new(s:node)
@@ -599,6 +608,7 @@ function! s:undotree.ConvertInput(updatetree)
 
     call self._parseNode(self.rawtree.entries,root)
 
+    let self.save_last = self.rawtree.save_last
     " Note: Normally, the current node should be the one that seq_cur points to,
     " but in fact it's not. May be bug, bug anyway I found a workaround:
     " first try to find the parent node of 'curhead', if not found, then use
@@ -724,7 +734,7 @@ function! s:undotree.Render()
                     let newline = newline.'| '
                 endif
             endfor
-            let newline = newline.'  '.(node.seq).'  '.
+            let newline = newline.'   '.(node.seq).'    '.
                         \s:gettime(node.time)
             " update the printed slot to its child.
             if len(node.p) == 0
@@ -761,11 +771,11 @@ function! s:undotree.Render()
                     call insert(slots,node[1],index)
                 endif
             endif
-            " split P to P+E if elements in p > 2
+            " split P to E+P if elements in p > 2
             if len(node) > 2
                 call insert(slots,node[0],index)
                 call remove(node,0)
-                call insert(slots,node,index)
+                call insert(slots,node,index+1)
             endif
         endif
         unlet node
@@ -973,7 +983,7 @@ endfunction
 
 
 "let s:auEvents = "InsertEnter,InsertLeave,WinEnter,WinLeave,CursorMoved"
-let s:auEvents = "InsertLeave,CursorMoved"
+let s:auEvents = "InsertLeave,CursorMoved,BufWritePost"
 exec "au ".s:auEvents." * call UndotreeUpdate()"
 
 "=================================================

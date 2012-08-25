@@ -17,9 +17,11 @@ syn match UndotreeSeq ' \zs\d\+\ze '
 syn match UndotreeCurrent '>\d\+<'
 syn match UndotreeNext '{\d\+}'
 syn match UndotreeHead '\[\d\+]'
-syn match UndotreeSaved '-\d\+-'
-syn match UndotreeHelp '^".*$' contains=UndotreeHelpKey
+syn match UndotreeHelp '^".*$' contains=UndotreeHelpKey,UndotreeHelpTitle
 syn match UndotreeHelpKey '^" \zs.\{-}\ze:' contained
+syn match UndotreeHelpTitle '--=.*=--' contained
+syn match UndotreeSavedSmall ' \zss\ze '
+syn match UndotreeSavedBig ' \zsS\ze '
 
 hi link UndotreeNode Question
 hi link UndotreeNodeCurrent Statement
@@ -31,8 +33,10 @@ hi link UndotreeCurrent Statement
 hi link UndotreeNext Type
 hi link UndotreeHead Identifier
 hi link UndotreeHelp Comment
-hi link UndotreeHelpKey Type
-hi link UndotreeSaved Constant
+hi link UndotreeHelpKey Function
+hi link UndotreeHelpTitle Type
+hi link UndotreeSavedSmall WarningMsg
+hi link UndotreeSavedBig MatchParen
 
 let b:undotree_syntax = 'undotree'
 
