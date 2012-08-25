@@ -7,6 +7,7 @@
 " TODO status line.
 " TODO Diff between 2 specific revisions.
 " TODO support horizontal split.
+" TODO Clear history from current seq.
 
 " At least version 7.0 is needed for undo branches.
 if v:version < 700
@@ -101,13 +102,25 @@ function! s:gettime(time)
             let sec = 0
         endif
         if sec < 60
-            return sec.' seconds ago'
+            if sec == 1
+                return '1 second ago'
+            else
+                return sec.' seconds ago'
+            endif
         endif
         if sec < 3600
-            return (sec/60).' minutes ago'
+            if (sec/60) == 1
+                return '1 minute ago'
+            else
+                return (sec/60).' minutes ago'
+            endif
         endif
         if sec < 86400 "3600*24
-            return (sec/3600).' hours ago'
+            if (sec/3600) == 1
+                return '1 hour ago'
+            else
+                return (sec/3600).' hours ago'
+            endif
         endif
         return (sec/86400).' days ago'
     endif
