@@ -27,7 +27,7 @@ endif
 
 " undotree window width
 if !exists('g:undotree_SplitWidth')
-    let g:undotree_SplitWidth = 28
+    let g:undotree_SplitWidth = 30
 endif
 
 " if set, let undotree window get focus after being opened, otherwise
@@ -48,7 +48,7 @@ endif
 
 " relative timestamp
 if !exists('g:undotree_RelativeTimestamp')
-    let g:undotree_RelativeTimestamp = 0
+    let g:undotree_RelativeTimestamp = 1
 endif
 
 "=================================================
@@ -69,10 +69,11 @@ let s:helpless = ['" Press ? for help.']
 let s:keymap = []
 " action, key, help.
 let s:keymap += [['Help','?','Toggle quick help']]
+let s:keymap += [['ClearHistory','C','Clear undo history']]
 let s:keymap += [['TimestampToggle','T','Toggle relative timestamp']]
 let s:keymap += [['DiffToggle','D','Toggle diff panel']]
-let s:keymap += [['Goup','K','Revert to next state']]
-let s:keymap += [['Godown','J','Revert to previous state']]
+let s:keymap += [['GoNext','K','Revert to next state']]
+let s:keymap += [['GoPrevious','J','Revert to previous state']]
 let s:keymap += [['Redo','<c-r>','Redo']]
 let s:keymap += [['Undo','u','Undo']]
 let s:keymap += [['Enter','<2-LeftMouse>','Revert to current']]
@@ -299,11 +300,11 @@ function! s:undotree.ActionRedo()
     call self.ActionInTarget("redo")
 endfunction
 
-function! s:undotree.ActionGodown()
+function! s:undotree.ActionGoPrevious()
     call self.ActionInTarget('earlier')
 endfunction
 
-function! s:undotree.ActionGoup()
+function! s:undotree.ActionGoNext()
     call self.ActionInTarget('later')
 endfunction
 
@@ -322,6 +323,22 @@ function! s:undotree.ActionTimestampToggle()
     call self.Update()
     " Update not always set current focus.
     call self.SetFocus()
+endfunction
+
+function! s:undotree.ActionClearHistory()
+    if confirm("Are you sure to clear ALL undo history?","&Yes\n&No") != 1
+        return
+    endif
+    if !self.SetTargetFocus()
+        return
+    endif
+    let ul_bak = &undolevels
+    let &undolevels = -1
+    call s:exec("norm! a \<BS>\<Esc>")
+    let &undolevels = ul_bak
+    unlet ul_bak
+    let self.targetBufnr = -1 "force update
+    call self.Update()
 endfunction
 
 function! s:undotree.UpdateDiff()
@@ -649,6 +666,10 @@ function! s:undotree.ConvertInput(updatetree)
     " seq_cur.
     if self.seq_cur == -1
         let self.seq_cur = self.rawtree.seq_cur
+    endif
+    " undo history is cleared
+    if len(self.rawtree.entries) == 0
+        let self.seq_cur = 0
     endif
     if a:updatetree
         let self.tree = root
