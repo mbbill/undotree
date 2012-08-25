@@ -37,13 +37,18 @@ if !exists('g:undotree_SetFocusWhenToggle')
 endif
 
 " diff window height
-if !exists('g:undotree_diffpanelHeight')
-    let g:undotree_diffpanelHeight = 10
+if !exists('g:undotree_DiffpanelHeight')
+    let g:undotree_DiffpanelHeight = 10
 endif
 
 " auto open diff window
-if !exists('g:undotree_diffAutoOpen')
-    let g:undotree_diffAutoOpen = 1
+if !exists('g:undotree_DiffAutoOpen')
+    let g:undotree_DiffAutoOpen = 1
+endif
+
+" relative timestamp
+if !exists('g:undotree_RelativeTimestamp')
+    let g:undotree_RelativeTimestamp = 0
 endif
 
 "=================================================
@@ -51,26 +56,27 @@ endif
 let s:cntr = 0
 
 " Help text
-let s:helpmore = ['" --= Marks =--',
+let s:helpmore = ['"    ===== Marks ===== ',
             \'" >num< : current change',
-            \'" {num} : change that will be redo',
+            \'" {num} : change to redo',
             \'" [num] : the last change',
             \'"   s   : saved changes',
-            \'"   S   : the last saved change',
-            \'" --= Hotkeys =--']
+            \'"   S   : last saved change',
+            \'"   ===== Hotkeys =====']
 let s:helpless = ['" Press ? for help.']
 
 " Keymap
 let s:keymap = []
 " action, key, help.
 let s:keymap += [['Help','?','Toggle quick help']]
+let s:keymap += [['TimestampToggle','T','Toggle relative timestamp']]
 let s:keymap += [['DiffToggle','D','Toggle diff panel']]
 let s:keymap += [['Goup','K','Revert to next state']]
 let s:keymap += [['Godown','J','Revert to previous state']]
 let s:keymap += [['Redo','<c-r>','Redo']]
 let s:keymap += [['Undo','u','Undo']]
-let s:keymap += [['Enter','<2-LeftMouse>','Revert to current state']]
-let s:keymap += [['Enter','<cr>','Revert to current state']]
+let s:keymap += [['Enter','<2-LeftMouse>','Revert to current']]
+let s:keymap += [['Enter','<cr>','Revert to current']]
 
 function! s:new(obj)
     let newobj = deepcopy(a:obj)
@@ -81,13 +87,30 @@ endfunction
 " Get formatted time
 function! s:gettime(time)
     if a:time == 0
-        return "--------"
+        return "Original"
     endif
-    let today = substitute(strftime("%c",localtime())," .*$",'','g')
-    if today == substitute(strftime("%c",a:time)," .*$",'','g')
-        return strftime("%H:%M:%S",a:time)
+    if !g:undotree_RelativeTimestamp
+        let today = substitute(strftime("%c",localtime())," .*$",'','g')
+        if today == substitute(strftime("%c",a:time)," .*$",'','g')
+            return strftime("%H:%M:%S",a:time)
+        else
+            return strftime("%H:%M:%S %b%d %Y",a:time)
+        endif
     else
-        return strftime("%H:%M:%S %b%d %Y",a:time)
+        let sec = localtime() - a:time
+        if sec < 0
+            let sec = 0
+        endif
+        if sec < 60
+            return sec.' seconds ago'
+        endif
+        if sec < 3600
+            return (sec/60).' minutes ago'
+        endif
+        if sec < 86400 "3600*24
+            return (sec/3600).' hours ago'
+        endif
+        return (sec/86400).' days ago'
     endif
 endfunction
 
@@ -182,7 +205,7 @@ function! s:undotree.Init()
     " Increase to make it unique.
     let s:cntr = s:cntr + 1
     let self.width = g:undotree_SplitWidth
-    let self.opendiff = g:undotree_diffAutoOpen
+    let self.opendiff = g:undotree_DiffAutoOpen
     let self.targetBufnr = -1
     let self.rawtree = {}  "data passed from undotree()
     let self.tree = {}     "data converted to internal format.
@@ -288,6 +311,17 @@ function! s:undotree.ActionDiffToggle()
     let self.opendiff = !self.opendiff
     call t:diffpanel.Toggle()
     call self.UpdateDiff()
+endfunction
+
+function! s:undotree.ActionTimestampToggle()
+    if !self.SetTargetFocus()
+        return
+    endif
+    let g:undotree_RelativeTimestamp = !g:undotree_RelativeTimestamp
+    let self.targetBufnr = -1 "force update
+    call self.Update()
+    " Update not always set current focus.
+    call self.SetFocus()
 endfunction
 
 function! s:undotree.UpdateDiff()
@@ -529,7 +563,7 @@ function! s:undotree.MarkSeqs()
         let index = self.seq2index[self.seq_cur]
         let lineNr = self.Index2Screen(index)
         call setline(lineNr,substitute(getline(lineNr),
-                    \' \(\d\+\) ','>\1<',''))
+                    \'\zs \(\d\+\) \ze [sS ] ','>\1<',''))
         " move cursor to that line.
         call s:exec("normal! " . lineNr . "G")
     endif
@@ -537,13 +571,13 @@ function! s:undotree.MarkSeqs()
         let index = self.seq2index[self.seq_curhead]
         let lineNr = self.Index2Screen(index)
         call setline(lineNr,substitute(getline(lineNr),
-                    \' \(\d\+\) ','{\1}',''))
+                    \'\zs \(\d\+\) \ze [sS ] ','{\1}',''))
     endif
     if self.seq_newhead != -1
         let index = self.seq2index[self.seq_newhead]
         let lineNr = self.Index2Screen(index)
         call setline(lineNr,substitute(getline(lineNr),
-                    \' \(\d\+\) ','[\1]',''))
+                    \'\zs \(\d\+\) \ze [sS ] ','[\1]',''))
     endif
     setlocal nomodifiable
 endfunction
@@ -735,7 +769,7 @@ function! s:undotree.Render()
                 endif
             endfor
             let newline = newline.'   '.(node.seq).'    '.
-                        \s:gettime(node.time)
+                        \'('.s:gettime(node.time).')'
             " update the printed slot to its child.
             if len(node.p) == 0
                 let slots[index] = 'x'
@@ -910,7 +944,7 @@ function! s:diffpanel.Show()
     set splitbelow
     set eventignore=all
 
-    let cmd = g:undotree_diffpanelHeight.'new '.self.bufname
+    let cmd = g:undotree_DiffpanelHeight.'new '.self.bufname
     silent exec cmd
 
     setlocal winfixwidth
