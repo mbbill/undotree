@@ -42,7 +42,8 @@ Add the following line to your *vimrc* in order to make them stored together.
 
 ### Configuration
  1. Basically, you do not need any configuration to let it work, cool?
- 1. But if you still want to do some customization, there is also a bunch of options provided. Open the *undotree.vim* to find them out since they're changed rapidly now.
+ 1. But if you still want to do some customization, there is also a couple of options provided.
+    * [Here](https://github.com/mbbill/undotree/blob/master/plugin/undotree.vim#L15) is a list of these options.
 
 ### Screenshot
 ![](http://files.myopera.com/mbbill/files/undotree.png)
@@ -56,6 +57,16 @@ https://github.com/mbbill/undotree/issues
  1. Run vim, and the log will automatically be appended to the file, and you may watch it using `tail`:
     * `$tail -F ~/undotree_debug.log`
  1. If you want to disable debug, just delete that file.
+
+### Alternatives
+Someone asked me about the difference with [Gundo](http://sjl.bitbucket.org/gundo.vim/), here is a list of differences, or advantages.
+ 1. Pure vimscript implementation and no 3rd-party libraries(like python) is needed, don't worry about performance, it's not such a big deal for vim to handle this. The only dependency is the 'diff' tool which always shipped with vim and even without 'diff' you still can use most of the features of this script.
+ 1. Realtime updated undo tree. Once you make changes, the undo tree will be updated simultaneously.
+ 1. Several useful marks, like current changeset, next redo changeset, saved changeset, etc.
+ 1. Toggle between relative timestamp and absolute timestamp.
+ 1. Realtime updated undo window.
+ 1. Ability to clear undo history.
+ 1. More customizable.
 
 ### License
 **BSD**
