@@ -9,8 +9,10 @@
 " TODO support horizontal split.
 " TODO Clear history from current seq.
 
-" At least version 7.0 is needed for undo branches.
-if v:version < 700
+" At least version 7.3 with 005 patch is needed for undo branches.
+" Refer to https://github.com/mbbill/undotree/issues/4 for details.
+" Thanks kien
+if !(v:version >= 703 && has("patch005"))
      finish
 endif
 
