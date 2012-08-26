@@ -773,7 +773,8 @@ function! s:undotree.Render()
         endif
 
         " output.
-        let newline = " "
+        let onespace = " "
+        let newline = onespace
         let newmeta = {}
         let node = slots[index]
         if type(node) == TYPE_X
@@ -845,7 +846,8 @@ function! s:undotree.Render()
             endif
         endif
         unlet node
-        if newline != " "
+        if newline != onespace
+            let newline = substitute(newline,'\s*$','','g') "remove trailing space.
             call insert(out,newline,0)
             call insert(outmeta,newmeta,0)
         endif
