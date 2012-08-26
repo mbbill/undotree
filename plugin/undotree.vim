@@ -12,8 +12,11 @@
 " At least version 7.3 with 005 patch is needed for undo branches.
 " Refer to https://github.com/mbbill/undotree/issues/4 for details.
 " Thanks kien
-if !(v:version >= 703 && has("patch005"))
-     finish
+if v:version < 703
+    finish
+endif
+if (v:version == 703 && !has("patch005"))
+    finish
 endif
 
 " tree node shape.
