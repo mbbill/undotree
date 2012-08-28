@@ -19,6 +19,9 @@ if (v:version == 703 && !has("patch005"))
     finish
 endif
 
+"=================================================
+"Options:
+
 " tree node shape.
 if !exists('g:undotree_TreeNodeShape')
     let g:undotree_TreeNodeShape = '*'
@@ -54,6 +57,15 @@ endif
 if !exists('g:undotree_RelativeTimestamp')
     let g:undotree_RelativeTimestamp = 1
 endif
+
+"Custom key mappings: add this function to your vimrc.
+"You can define whatever mapping as you like, this is a hook function which
+"will be called after undotree window initialized.
+"
+"function g:undotree_CustomMap()
+"    map <c-n> J
+"    map <c-p> K
+"endfunction
 
 "=================================================
 " Golbal buf counter.
@@ -251,6 +263,9 @@ function! s:undotree.BindKey()
     for i in s:keymap
         silent exec 'nnoremap <silent> <script> <buffer> '.i[1].' :call <sid>undotreeAction("'.i[0].'")<cr>'
     endfor
+    if exists('*g:undotree_CustomMap')
+        call g:undotree_CustomMap()
+    endif
 endfunction
 
 function! s:undotree.BindAu()
