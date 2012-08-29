@@ -180,7 +180,6 @@ endfunction
 
 function! s:panel.SetFocus()
     let winnr = bufwinnr(self.bufname)
-    call s:log("SetFocus() winnr:".winnr." bufname:".self.bufname)
     " already focused.
     if winnr == winnr()
         return
@@ -189,6 +188,7 @@ function! s:panel.SetFocus()
         echoerr "Fatal: window does not exist!"
         return
     endif
+    call s:log("SetFocus() winnr:".winnr." bufname:".self.bufname)
     " wincmd would cause cursor outside window.
     call s:exec("norm! ".winnr."\<c-w>\<c-w>")
 endfunction
@@ -301,8 +301,11 @@ function! s:undotree.ActionInTarget(cmd)
     if !self.SetTargetFocus()
         return
     endif
-    call s:exec(a:cmd)
-    call self.Update()
+    " Target should be a normal buffer.
+    if (&bt == '') && (&modifiable == 1) && (mode() == 'n')
+        call s:exec(a:cmd)
+        call self.Update()
+    endif
     " Update not always set current focus.
     call self.SetFocus()
 endfunction
@@ -417,9 +420,7 @@ function! s:undotree.Show()
     endif
 
     " store info for the first update.
-    let self.targetBufnr = bufnr('%')
-    let self.rawtree = undotree()
-    let self.seq_last = self.rawtree.seq_last
+    let targetBufnr = bufnr('%')
 
     " Create undotree window.
     let cmd = g:undotree_SplitLocation . " vertical" .
@@ -442,17 +443,12 @@ function! s:undotree.Show()
     call self.BindKey()
     call self.BindAu()
 
-    let self.seq_cur = -1
-    let self.seq_curhead = -1
-    let self.seq_newhead = -1
-    call self.ConvertInput(1)
-    call self.Render()
-    call self.Draw()
-    call self.MarkSeqs()
     if self.opendiff
         call t:diffpanel.Show()
-        call self.UpdateDiff()
     endif
+    call s:exec("norm! ".bufwinnr(targetBufnr)."\<c-w>\<c-w>")
+    let self.targetBufnr = -1 "force update
+    call self.Update()
     if !g:undotree_SetFocusWhenToggle
         call self.SetTargetFocus()
     endif
@@ -460,46 +456,53 @@ endfunction
 
 " called outside undotree window
 function! s:undotree.Update()
-    if &bt != '' "it's nor a normal buffer, could be help, quickfix, etc.
-        return
-    endif
-    if &modifiable == 0 "no modifiable buffer.
-        return
-    endif
-    if mode() != 'n' "not in normal mode, return.
-        return
-    endif
     if !self.IsVisible()
         return
     endif
-    "update undotree,set focus
-    if self.targetBufnr == bufnr('%')
-        let newrawtree = undotree()
-        if self.rawtree == newrawtree
+    let bufname = bufname('%')
+    if bufname == self.bufname || bufname == t:diffpanel.bufname
+        return
+    endif
+    if (&bt != '') || (&modifiable == 0) || (mode() != 'n')
+        if self.targetBufnr == bufnr('%')
             return
         endif
-
-        " same buffer, but seq changed.
-        if newrawtree.seq_last == self.seq_last
-            call s:log("undotree.Update() update seqs")
-            let self.rawtree = newrawtree
-            call self.ConvertInput(0) "only update seqs.
-            if (self.seq_cur == self.seq_cur_bak) &&
-                        \(self.seq_curhead == self.seq_curhead_bak)&&
-                        \(self.seq_newhead == self.seq_newhead_bak)&&
-                        \(self.save_last == self.save_last_bak)
+        let emptybuf = 1 "This is not a valid buffer.
+    else
+        let emptybuf = 0
+        "update undotree,set focus
+        if self.targetBufnr == bufnr('%')
+            let newrawtree = undotree()
+            if self.rawtree == newrawtree
                 return
             endif
-            call self.SetFocus()
-            call self.MarkSeqs()
-            call self.UpdateDiff()
-            return
+
+            " same buffer, but seq changed.
+            if newrawtree.seq_last == self.seq_last
+                call s:log("undotree.Update() update seqs")
+                let self.rawtree = newrawtree
+                call self.ConvertInput(0) "only update seqs.
+                if (self.seq_cur == self.seq_cur_bak) &&
+                            \(self.seq_curhead == self.seq_curhead_bak)&&
+                            \(self.seq_newhead == self.seq_newhead_bak)&&
+                            \(self.save_last == self.save_last_bak)
+                    return
+                endif
+                call self.SetFocus()
+                call self.MarkSeqs()
+                call self.UpdateDiff()
+                return
+            endif
         endif
     endif
     call s:log("undotree.Update() update whole tree")
 
     let self.targetBufnr = bufnr('%')
-    let self.rawtree = undotree()
+    if emptybuf " Show an empty undo tree instead of do nothing.
+        let self.rawtree = {'seq_last':0,'entries':[],'time_cur':0,'save_last':0,'synced':1,'save_cur':0,'seq_cur':0}
+    else
+        let self.rawtree = undotree()
+    endif
     let self.seq_last = self.rawtree.seq_last
     let self.seq_cur = -1
     let self.seq_curhead = -1

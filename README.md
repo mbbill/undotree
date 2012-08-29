@@ -1,7 +1,10 @@
 ### [Link to Vim.org](http://www.vim.org/scripts/script.php?script_id=4177)
 
+### Screenshot
+![](http://files.myopera.com/mbbill/files/undotree.png)
+
 ### Description
-Vim 7.0 added a new feature named **Undo branches**. Basically it's a kind of ability to go back to the text after any change, even if they were undone. Vim stores undo history in a tree which you can browse and manipulate through a bunch of commands. But that was not enough straightforward and a bit hard to use. You may use `:help new-undo-branches` or `:help undo-tree` to get more detailed help.  
+Vim 7.0 added a new feature named **Undo branches**. Basically it's a kind of ability to go back to the text after any change, even if they were undone. Vim stores undo history in a tree which you can browse and manipulate through a bunch of commands. But that was not enough straightforward and a bit hard to use. You may use `:help new-undo-branches` or `:help undo-tree` to get more detailed help.
 Now this plug-in will free you from those commands and bring back the power of undo tree.
 
 ### Features
@@ -45,10 +48,7 @@ Add the following line to your *vimrc* in order to make them stored together.
  1. But if you still want to do some customization, there is also a couple of options provided.
     * [Here](https://github.com/mbbill/undotree/blob/master/plugin/undotree.vim#L15) is a list of these options.
 
-### Screenshot
-![](http://files.myopera.com/mbbill/files/undotree.png)
-
-### For any Issues
+### Post any issue and feature request here:
 https://github.com/mbbill/undotree/issues
 
 ### Debug
