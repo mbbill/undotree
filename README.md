@@ -15,6 +15,8 @@ Now this plug-in will free you from those commands and bring back the power of u
     * The next change that will be restored by `:redo` or `<ctrl-r>` is marked as **{seq}**, it's the same as *curhead* returned by *undotree()*
     * The **[seq]** marks the last change and where further changes will be added, it's the same as *newhead* returned by *undotree()*
     * Saved changes are marked as **s** and the current change is **S**
+ 1. Live updated diff panel.
+ 1. Highlight changed text.
  1. Revert to a specific change by mouse click or enter key.
  1. Hotkey support.
  1. Display changes in diff panel.

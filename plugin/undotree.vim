@@ -63,6 +63,12 @@ if !exists('g:undotree_HighlightChangedText')
     let g:undotree_HighlightChangedText = 1
 endif
 
+" Highlight linked syntax type.
+" You may chose your favorite through ":hi" command
+if !exists('g:undotree_HighlightSyntax')
+    let g:undotree_HighlightSyntax = "UnderLined"
+endif
+
 "Custom key mappings: add this function to your vimrc.
 "You can define whatever mapping as you like, this is a hook function which
 "will be called after undotree window initialized.
@@ -975,7 +981,7 @@ function! s:diffpanel.HighlightDiff(diffresult,targetBufnr)
     if empty(a:diffresult)
         return
     endif
-    hi link UndotreeChangedText Underlined
+    exec "hi link UndotreeChangedText ".g:undotree_HighlightSyntax
     " clear previous highlighted syntax
     if has_key(self.diffmatches,a:targetBufnr)
         for i in self.diffmatches[a:targetBufnr]
