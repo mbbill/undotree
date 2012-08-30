@@ -424,6 +424,20 @@ function! s:undotree.Toggle()
     endif
 endfunction
 
+function! s:undotree.GetStatusLine()
+    if self.seq_cur != -1
+        let seq_cur = self.seq_cur
+    else
+        let seq_cur = 'None'
+    endif
+    if self.seq_curhead != -1
+        let seq_curhead = self.seq_curhead
+    else
+        let seq_curhead = 'None'
+    endif
+    return 'current: '.seq_cur.' redo: '.seq_curhead
+endfunction
+
 function! s:undotree.Show()
     call s:log("undotree.Show()")
     if self.IsVisible()
@@ -449,6 +463,7 @@ function! s:undotree.Show()
     setlocal nonumber
     setlocal cursorline
     setlocal nomodifiable
+    setlocal statusline=%!t:undotree.GetStatusLine()
     setfiletype undotree
 
     call self.BindKey()
@@ -779,14 +794,16 @@ function! s:undotree.Render()
         endfor
     
         " Then, find the element with minimun seq.
+        let minseq = 99999999
+        let minnode = {}
         if foundx == 0
             "assume undo level isn't more than this... of course
-            let minseq = 99999999
             for i in range(len(slots))
                 if type(slots[i]) == TYPE_E
                     if slots[i].seq < minseq
                         let minseq = slots[i].seq
                         let index = i
+                        let minnode = slots[i]
                         continue
                     endif
                 endif
@@ -795,6 +812,7 @@ function! s:undotree.Render()
                         if j.seq < minseq
                             let minseq = j.seq
                             let index = i
+                            let minnode = j
                             continue
                         endif
                     endfor
@@ -870,9 +888,9 @@ function! s:undotree.Render()
             endif
             " split P to E+P if elements in p > 2
             if len(node) > 2
-                call insert(slots,node[0],index)
-                call remove(node,0)
-                call insert(slots,node,index+1)
+                call remove(node,index(node,minnode))
+                call insert(slots,minnode,index)
+                call insert(slots,node,index)
             endif
         endif
         unlet node
