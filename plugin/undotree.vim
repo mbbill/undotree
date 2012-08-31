@@ -281,11 +281,14 @@ endfunction
 
 function! s:undotree.BindAu()
     " Auto exit if it's the last window
-    au Bufenter <buffer> if type(gettabvar(tabpagenr(),'undotree')) == type(s:undotree)
-                \&& !t:undotree.IsTargetVisible() |
-                \call t:undotree.Hide() | call t:diffpanel.Hide() | endif
-    au Bufenter <buffer> if type(gettabvar(tabpagenr(),'undotree')) == type(s:undotree) |
-                \let t:undotree.width = winwidth(winnr()) | endif
+    augroup Undotree_Main
+        au!
+        au Bufenter <buffer> if type(gettabvar(tabpagenr(),'undotree')) == type(s:undotree)
+                    \&& !t:undotree.IsTargetVisible() |
+                    \call t:undotree.Hide() | call t:diffpanel.Hide() | endif
+        au Bufenter <buffer> if type(gettabvar(tabpagenr(),'undotree')) == type(s:undotree) |
+                    \let t:undotree.width = winwidth(winnr()) | endif
+    augroup end
 endfunction
 
 function! s:undotree.Action(action)
@@ -1091,10 +1094,13 @@ endfunction
 
 function! s:diffpanel.BindAu()
     " Auto exit if it's the last window or undotree closed.
-    au Bufenter <buffer> if type(gettabvar(tabpagenr(),'undotree')) == type(s:undotree)
-                \&& (!t:undotree.IsTargetVisible() ||
-                \!t:undotree.IsVisible()) |
-                \call t:undotree.Hide() | call t:diffpanel.Hide() | endif
+    augroup Undotree_Diff
+        au!
+        au Bufenter <buffer> if type(gettabvar(tabpagenr(),'undotree')) == type(s:undotree)
+                    \&& (!t:undotree.IsTargetVisible() ||
+                    \!t:undotree.IsVisible()) |
+                    \call t:undotree.Hide() | call t:diffpanel.Hide() | endif
+    augroup end
 endfunction
 
 function! s:diffpanel.CleanUpHighlight()
