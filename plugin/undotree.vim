@@ -1015,12 +1015,15 @@ function! s:diffpanel.HighlightDiff(diffresult,targetBufnr)
             let lineNr = str2nr(matchnum)
             continue
         endif
-        let matchtext = matchstr(line,'^> \zs.*$')
+        let matchtext = matchstr(line,'^>\zs .*$')
         if empty(matchtext)
             continue
         endif
-        let matchtext = '\%'.lineNr.'l\V'.escape(matchtext,'"\')
-        call add(w:undotree_diffmatches,matchadd("UndotreeChangedText",matchtext))
+        if matchtext != ' '
+            let matchtext = '\%'.lineNr.'l\V'.escape(matchtext[1:],'"\') "remove beginning space.
+            call s:log("matchadd() ->  ".matchtext)
+            call add(w:undotree_diffmatches,matchadd("UndotreeChangedText",matchtext))
+        endif
         let lineNr = lineNr+1
     endfor
 endfunction
