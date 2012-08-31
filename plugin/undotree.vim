@@ -8,6 +8,7 @@
 " TODO Diff between 2 specific revisions.
 " TODO support horizontal split.
 " TODO Clear history from current seq.
+" TODO fix issue with two window showing the same buffer.
 
 " At least version 7.3 with 005 patch is needed for undo branches.
 " Refer to https://github.com/mbbill/undotree/issues/4 for details.
@@ -247,6 +248,7 @@ function! s:undotree.Init()
     let self.width = g:undotree_SplitWidth
     let self.opendiff = g:undotree_DiffAutoOpen
     let self.targetBufnr = -1
+    let self.targetWinnr = -1
     let self.rawtree = {}  "data passed from undotree()
     let self.tree = {}     "data converted to internal format.
     let self.seq_last = -1
@@ -394,7 +396,7 @@ function! s:undotree.UpdateDiff()
     if !t:diffpanel.IsVisible()
         return
     endif
-    call t:diffpanel.Update(self.seq_cur,self.targetBufnr)
+    call t:diffpanel.Update(self.seq_cur,self.targetBufnr,self.targetWinnr)
 endfunction
 
 function! s:undotree.IsTargetVisible()
@@ -407,7 +409,12 @@ endfunction
 
 " May fail due to target window closed.
 function! s:undotree.SetTargetFocus()
-    let winnr = bufwinnr(self.targetBufnr)
+    " First, try winnr. otherwise find the first window with buffer.
+    if winbufnr(self.targetWinnr) == self.targetBufnr
+        let winnr = self.targetWinnr
+    else
+        let winnr = bufwinnr(self.targetBufnr)
+    endif
     call s:log("undotree.SetTargetFocus() winnr:".winnr." targetBufname:".bufname(self.targetBufnr))
     if winnr == -1
         return 0
@@ -448,6 +455,8 @@ function! s:undotree.Show()
     endif
 
     " store info for the first update.
+    " TODO here, it is still possible to find an other window by mistake chich
+    " contains the same buffer.
     let targetBufnr = bufnr('%')
 
     " Create undotree window.
@@ -493,14 +502,15 @@ function! s:undotree.Update()
         return
     endif
     if (&bt != '') || (&modifiable == 0) || (mode() != 'n')
-        if self.targetBufnr == bufnr('%')
+        if self.targetBufnr == bufnr('%') && self.targetWinnr == winnr()
             return
         endif
-        let emptybuf = 1 "This is not a valid buffer.
+        let emptybuf = 1 "This is not a valid buffer, could be help or something.
     else
         let emptybuf = 0
         "update undotree,set focus
         if self.targetBufnr == bufnr('%')
+            let self.targetWinnr = winnr()
             let newrawtree = undotree()
             if self.rawtree == newrawtree
                 return
@@ -527,6 +537,7 @@ function! s:undotree.Update()
     call s:log("undotree.Update() update whole tree")
 
     let self.targetBufnr = bufnr('%')
+    let self.targetWinnr = winnr()
     if emptybuf " Show an empty undo tree instead of do nothing.
         let self.rawtree = {'seq_last':0,'entries':[],'time_cur':0,'save_last':0,'synced':1,'save_cur':0,'seq_cur':0}
     else
@@ -917,7 +928,7 @@ endfunction
 "diff panel
 let s:diffpanel = s:new(s:panel)
 
-function! s:diffpanel.Update(seq,targetBufnr)
+function! s:diffpanel.Update(seq,targetBufnr,targetWinnr)
     call s:log('diffpanel.Update(),seq:'.a:seq.' bufname:'.bufname(a:targetBufnr))
     if !self.diffexecutable
         return
@@ -934,7 +945,11 @@ function! s:diffpanel.Update(seq,targetBufnr)
             let ei_bak = &eventignore
             set eventignore=all
 
-            let winnr = bufwinnr(a:targetBufnr)
+            if winbufnr(a:targetWinnr) == a:targetBufnr
+                let winnr = a:targetWinnr
+            else
+                let winnr = bufwinnr(a:targetBufnr)
+            endif
             if winnr == -1
                 return
             else
@@ -974,7 +989,7 @@ function! s:diffpanel.Update(seq,targetBufnr)
     endif
 
     if g:undotree_HighlightChangedText
-        call self.HighlightDiff(diffresult,a:targetBufnr)
+        call self.HighlightDiff(diffresult)
     endif
 
     call self.SetFocus()
@@ -992,12 +1007,9 @@ function! s:diffpanel.Update(seq,targetBufnr)
     call t:undotree.SetFocus()
 endfunction
 
-function! s:diffpanel.HighlightDiff(diffresult,targetBufnr)
+function! s:diffpanel.HighlightDiff(diffresult)
     " set target focus first.
-    let winnr = bufwinnr(a:targetBufnr)
-    if winnr != winnr()
-        call s:exec("norm! ".winnr."\<c-w>\<c-w>")
-    endif
+    call t:undotree.SetTargetFocus()
 
     if empty(a:diffresult)
         return
