@@ -7,8 +7,6 @@
 " TODO status line.
 " TODO Diff between 2 specific revisions.
 " TODO support horizontal split.
-" TODO Clear history from current seq.
-" TODO fix issue with two window showing the same buffer.
 
 " At least version 7.3 with 005 patch is needed for undo branches.
 " Refer to https://github.com/mbbill/undotree/issues/4 for details.
