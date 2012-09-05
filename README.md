@@ -29,7 +29,7 @@ Now this plug-in will free you from those commands and bring back the power of u
 ### Usage
  1. Use `:UndotreeToggle` to toggle the undo-tree panel. You may want to map this command to whatever hotkey by adding the following line to your vimrc, take F5 for example.
 
-    nnoremap    <F5>    :UndotreeToggle<cr>
+    nnoremap    &lt;F5&gt;    :UndotreeToggle&lt;cr&gt;
 
  1. Then you can try to do some modification, and the undo tree will automatically updated afterwards.
  1. There are a bunch of hotkeys provided by vim to switch between the changes in history, like `u`, `<ctrl-r>`, `g+`, `g-` as well as the `:earlier` and `:later` commands.
