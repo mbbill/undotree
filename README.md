@@ -74,4 +74,4 @@ Someone asked me about the difference with [Gundo](http://sjl.bitbucket.org/gund
 **BSD**
 
 ### Author
-Ming Bai  `<mbbill AT gmail DOT COM>`
+Ming Bai  &lt;mbbill AT gmail DOT COM&gt;
