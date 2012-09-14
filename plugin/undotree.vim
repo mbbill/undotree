@@ -26,7 +26,7 @@ if !exists('g:undotree_TreeNodeShape')
     let g:undotree_TreeNodeShape = '*'
 endif
 
-" split window location, could also be topright
+" split window location, could also be botright,
 if !exists('g:undotree_SplitLocation')
     let g:undotree_SplitLocation = 'topleft'
 endif
