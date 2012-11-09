@@ -4,10 +4,6 @@
 " Author: Ming Bai <mbbill@gmail.com>
 " License: BSD
 
-if exists("b:undotree_syntax")
-    finish
-endif
-
 syn match UndotreeNode ' \zs\*\ze '
 syn match UndotreeNodeCurrent '\zs\*\ze.*>\d\+<'
 syn match UndotreeTimeStamp '(.*)$'
@@ -37,7 +33,5 @@ hi link UndotreeHelpKey Function
 hi link UndotreeHelpTitle Type
 hi link UndotreeSavedSmall WarningMsg
 hi link UndotreeSavedBig MatchParen
-
-let b:undotree_syntax = 'undotree'
 
 " vim: set et fdm=marker sts=4 sw=4:
