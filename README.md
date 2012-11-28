@@ -18,7 +18,7 @@ Now this plug-in will free you from those commands and bring back the power of u
  1. Live updated diff panel.
  1. Highlight for changed text.
  1. Revert to a specific change by a single mouse click or key stroke.
- 1. Customizable hotkeys.
+ 1. Customizable hotkeys and highlighting.
  1. Display changes in diff panel.
 
 ### [Download](https://github.com/mbbill/undotree/tags)

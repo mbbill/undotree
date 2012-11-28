@@ -19,19 +19,19 @@ syn match UndotreeHelpTitle '===.*===' contained
 syn match UndotreeSavedSmall ' \zss\ze '
 syn match UndotreeSavedBig ' \zsS\ze '
 
-hi link UndotreeNode Question
-hi link UndotreeNodeCurrent Statement
-hi link UndotreeTimeStamp Function
-hi link UndotreeFirstNode Function
-hi link UndotreeBranch Constant
-hi link UndotreeSeq Comment
-hi link UndotreeCurrent Statement
-hi link UndotreeNext Type
-hi link UndotreeHead Identifier
-hi link UndotreeHelp Comment
-hi link UndotreeHelpKey Function
-hi link UndotreeHelpTitle Type
-hi link UndotreeSavedSmall WarningMsg
-hi link UndotreeSavedBig MatchParen
+hi def link UndotreeNode Question
+hi def link UndotreeNodeCurrent Statement
+hi def link UndotreeTimeStamp Function
+hi def link UndotreeFirstNode Function
+hi def link UndotreeBranch Constant
+hi def link UndotreeSeq Comment
+hi def link UndotreeCurrent Statement
+hi def link UndotreeNext Type
+hi def link UndotreeHead Identifier
+hi def link UndotreeHelp Comment
+hi def link UndotreeHelpKey Function
+hi def link UndotreeHelpTitle Type
+hi def link UndotreeSavedSmall WarningMsg
+hi def link UndotreeSavedBig MatchParen
 
 " vim: set et fdm=marker sts=4 sw=4:
