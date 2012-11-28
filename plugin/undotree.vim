@@ -64,8 +64,11 @@ endif
 
 " Highlight linked syntax type.
 " You may chose your favorite through ":hi" command
-if !exists('g:undotree_HighlightSyntax')
-    let g:undotree_HighlightSyntax = "UnderLined"
+if !exists('g:undotree_HighlightSyntaxAdd')
+    let g:undotree_HighlightSyntaxAdd = "DiffAdd"
+endif
+if !exists('g:undotree_HighlightSyntaxChange')
+    let g:undotree_HighlightSyntaxChange = "DiffChange"
 endif
 
 "Custom key mappings: add this function to your vimrc.
@@ -1012,7 +1015,6 @@ function! s:diffpanel.HighlightDiff(diffresult)
     if empty(a:diffresult)
         return
     endif
-    exec "hi link UndotreeChangedText ".g:undotree_HighlightSyntax
     " clear previous highlighted syntax
     " matchadd associates with windows.
     if exists("w:undotree_diffmatches")
@@ -1026,6 +1028,7 @@ function! s:diffpanel.HighlightDiff(diffresult)
         let matchnum = matchstr(line,'^[0-9,\,]*[ac]\zs\d*\ze')
         if !empty(matchnum)
             let lineNr = str2nr(matchnum)
+            let matchwhat = matchstr(line,'^[0-9,\,]*\zs[ac]\ze\d*')
             continue
         endif
         let matchtext = matchstr(line,'^>\zs .*$')
@@ -1034,8 +1037,8 @@ function! s:diffpanel.HighlightDiff(diffresult)
         endif
         if matchtext != ' '
             let matchtext = '\%'.lineNr.'l\V'.escape(matchtext[1:],'"\') "remove beginning space.
-            call s:log("matchadd() ->  ".matchtext)
-            call add(w:undotree_diffmatches,matchadd("UndotreeChangedText",matchtext))
+            call s:log("matchadd(".matchwhat.") ->  ".matchtext)
+            call add(w:undotree_diffmatches,matchadd((matchwhat ==# 'a' ? g:undotree_HighlightSyntaxAdd : g:undotree_HighlightSyntaxChange),matchtext))
         endif
         let lineNr = lineNr+1
     endfor
