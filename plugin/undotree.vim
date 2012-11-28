@@ -1178,6 +1178,9 @@ function! UndotreeToggle()
     call t:undotree.Toggle()
     call s:log("<<< UndotreeToggle() leave")
 endfunction
+function! UndotreeIsVisible()
+    return (exists('t:undotree') && t:undotree.IsVisible())
+endfunction
 
 
 "let s:auEvents = "InsertEnter,InsertLeave,WinEnter,WinLeave,CursorMoved"
