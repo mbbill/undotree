@@ -292,7 +292,7 @@ function! s:undotree.BindAu()
     augroup Undotree_Main
         au!
         au BufEnter <buffer> call s:exitIfLast()
-        au BufEnter <buffer> if exists('t:undotree') |
+        au BufEnter,BufLeave <buffer> if exists('t:undotree') |
                     \let t:undotree.width = winwidth(winnr()) | endif
     augroup end
 endfunction
@@ -491,6 +491,7 @@ function! s:undotree.Update()
     if !self.IsVisible()
         return
     endif
+    " do nothing if we're in the undotree or diff panel
     let bufname = bufname('%')
     if bufname == self.bufname || bufname == t:diffpanel.bufname
         return
@@ -1097,7 +1098,6 @@ function! s:diffpanel.Show()
     set eventignore=all
 
     let cmd = g:undotree_DiffpanelHeight.'new '.self.bufname
-    "silent exec cmd
     call s:exec(cmd)
 
     setlocal winfixwidth
@@ -1232,7 +1232,7 @@ endfunction
 
 
 "let s:auEvents = "InsertEnter,InsertLeave,WinEnter,WinLeave,CursorMoved"
-let s:auEvents = "WinEnter,InsertLeave,CursorMoved,BufWritePost"
+let s:auEvents = "BufEnter,InsertLeave,CursorMoved,BufWritePost"
 exec "au ".s:auEvents." * call UndotreeUpdate()"
 
 "=================================================
