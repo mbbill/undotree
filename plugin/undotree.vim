@@ -12,11 +12,11 @@
 " Refer to https://github.com/mbbill/undotree/issues/4 for details.
 " Thanks kien
 if v:version < 703
-    echoerr "undotree.vim needs Vim version >= 7.3"
+    command! -n=0 -bar UndotreeToggle :echoerr "undotree.vim needs Vim version >= 7.3"
     finish
 endif
 if (v:version == 703 && !has("patch005"))
-    echoerr "undotree.vim needs vim7.3 with patch005 applied."
+    command! -n=0 -bar UndotreeToggle :echoerr "undotree.vim needs vim7.3 with patch005 applied."
     finish
 endif
 
