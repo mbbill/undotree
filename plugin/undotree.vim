@@ -1108,7 +1108,6 @@ function! s:diffpanel.Show()
     setlocal buftype=nowrite
     setlocal bufhidden=delete
     setlocal nowrap
-    setlocal foldcolumn=0
     setlocal nobuflisted
     setlocal nospell
     setlocal nonumber
@@ -1121,6 +1120,9 @@ function! s:diffpanel.Show()
 
     " syntax need filetype autocommand
     setfiletype diff
+    setlocal foldcolumn=0
+    setlocal nofoldenable
+
     call self.BindAu()
     call t:undotree.SetFocus()
     call winrestview(savedview)
