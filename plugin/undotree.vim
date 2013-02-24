@@ -1003,7 +1003,9 @@ function! s:diffpanel.Update(seq,targetBufnr,targetid)
     call append(0,'- seq: '.a:seq.' -')
 
     "remove the last empty line
-    call s:exec('$d _')
+    if getline("$") == ""
+        call s:exec('$d _')
+    endif
     call s:exec('norm! gg') "move cursor to line 1.
     setlocal nomodifiable
     call t:undotree.SetFocus()
