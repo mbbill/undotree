@@ -97,6 +97,7 @@ let s:helpless = ['" Press ? for help.']
 let s:keymap = []
 " action, key, help.
 let s:keymap += [['Help','?','Toggle quick help']]
+let s:keymap += [['Close','q','Close this panel']]
 let s:keymap += [['FocusTarget','<tab>','Set Focus to editor']]
 let s:keymap += [['ClearHistory','C','Clear undo history']]
 let s:keymap += [['TimestampToggle','T','Toggle relative timestamp']]
@@ -399,6 +400,10 @@ function! s:undotree.ActionClearHistory()
     unlet ul_bak
     let self.targetBufnr = -1 "force update
     call self.Update()
+endfunction
+
+function! s:undotree.ActionClose()
+    call self.Toggle()
 endfunction
 
 function! s:undotree.UpdateDiff()
