@@ -54,6 +54,10 @@ if !exists('g:undotree_DiffAutoOpen')
     let g:undotree_DiffAutoOpen = 1
 endif
 
+if !exists('g:undotree_DiffCommand')
+    let g:undotree_DiffCommand = "diff"
+endif
+
 " relative timestamp
 if !exists('g:undotree_RelativeTimestamp')
     let g:undotree_RelativeTimestamp = 1
@@ -983,7 +987,7 @@ function! s:diffpanel.Update(seq,targetBufnr,targetid)
             if writefile(new,tempfile2) == -1
                 echoerr "Can not write to temp file:".tempfile2
             endif
-            let diffresult = split(system('diff '.tempfile1.' '.tempfile2),"\n")
+            let diffresult = split(system(g:undotree_DiffCommand.' '.tempfile1.' '.tempfile2),"\n")
             call s:log("diffresult: ".string(diffresult))
             if delete(tempfile1) != 0
                 echoerr "Can not delete temp file:".tempfile1
