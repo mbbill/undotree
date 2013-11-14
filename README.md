@@ -33,16 +33,14 @@ Now this plug-in will free you from those commands and bring back the power of u
     nnoremap    &lt;F5&gt;    :UndotreeToggle&lt;cr&gt;
 
  1. Then you can try to do some modification, and the undo tree will automatically updated afterwards.
- 1. There are a bunch of hotkeys provided by vim to switch between the changes in history, like `u`, `<ctrl-r>`, `g+`, `g-` as well as the `:earlier` and `:later` commands.
+ 1. There are some hotkeys provided by vim to switch between the changes in history, like `u`, `<ctrl-r>`, `g+`, `g-` as well as the `:earlier` and `:later` commands.
  1. You may also switch to undotree panel and use the hotkeys to switch between history versions. Press `?` in undotree window for quick help of hotkeys.
  1. You can monitor the changed text in diff panel which is automatically updated when undo/redo happens.
  1. Persistent undo
-    * It is highly recommend to enable the persistent undo. If you don't like your working directory be messed up with the undo file everywhere.
-
-Add the following line to your *vimrc* in order to make them stored together.
+    * It is highly recommend to enable the persistent undo. If you don't like your working directory be messed up with the undo file everywhere, you may add the following line to your *vimrc* in order to make them stored together.
 
     if has("persistent_undo")
-        set undodir = '/path/to/what/you/want/'
+        set undodir = '~/.undodir/'
         set undofile
     endif
 
