@@ -39,6 +39,8 @@ Now this plug-in will free you from those commands and bring back the power of u
  1. Persistent undo
     * It is highly recommend to enable the persistent undo. If you don't like your working directory be messed up with the undo file everywhere, you may add the following line to your *vimrc* in order to make them stored together.
 
+// In your vimrc
+
     if has("persistent_undo")
         set undodir = '~/.undodir/'
         set undofile
