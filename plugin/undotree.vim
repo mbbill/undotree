@@ -23,25 +23,62 @@ endif
 "=================================================
 "Options:
 
-" tree node shape.
-if !exists('g:undotree_TreeNodeShape')
-    let g:undotree_TreeNodeShape = '*'
-endif
-
-" split window location, could also be botright,
-if !exists('g:undotree_SplitLocation')
-    let g:undotree_SplitLocation = 'topleft'
+" Window layout
+" style 1
+" +----------+------------------------+
+" |          |                        |
+" |          |                        |
+" | undotree |                        |
+" |          |                        |
+" |          |                        |
+" +----------+                        |
+" |          |                        |
+" |   diff   |                        |
+" |          |                        |
+" +----------+------------------------+
+" Style 2
+" +----------+------------------------+
+" |          |                        |
+" |          |                        |
+" | undotree |                        |
+" |          |                        |
+" |          |                        |
+" +----------+------------------------+
+" |                                   |
+" |   diff                            |
+" |                                   |
+" +-----------------------------------+
+" Style 3
+" +------------------------+----------+
+" |                        |          |
+" |                        |          |
+" |                        | undotree |
+" |                        |          |
+" |                        |          |
+" |                        +----------+
+" |                        |          |
+" |                        |   diff   |
+" |                        |          |
+" +------------------------+----------+
+" Style 4
+" +-----------------------++----------+
+" |                        |          |
+" |                        |          |
+" |                        | undotree |
+" |                        |          |
+" |                        |          |
+" +------------------------+----------+
+" |                                   |
+" |                            diff   |
+" |                                   |
+" +-----------------------------------+
+if !exists('g:undotree_WindowLayout')
+    let g:undotree_WindowLayout = 1
 endif
 
 " undotree window width
 if !exists('g:undotree_SplitWidth')
     let g:undotree_SplitWidth = 30
-endif
-
-" if set, let undotree window get focus after being opened, otherwise
-" focus will stay in current window.
-if !exists('g:undotree_SetFocusWhenToggle')
-    let g:undotree_SetFocusWhenToggle = 0
 endif
 
 " diff window height
@@ -52,6 +89,17 @@ endif
 " auto open diff window
 if !exists('g:undotree_DiffAutoOpen')
     let g:undotree_DiffAutoOpen = 1
+endif
+
+" if set, let undotree window get focus after being opened, otherwise
+" focus will stay in current window.
+if !exists('g:undotree_SetFocusWhenToggle')
+    let g:undotree_SetFocusWhenToggle = 0
+endif
+
+" tree node shape.
+if !exists('g:undotree_TreeNodeShape')
+    let g:undotree_TreeNodeShape = '*'
 endif
 
 if !exists('g:undotree_DiffCommand')
@@ -75,6 +123,12 @@ if !exists('g:undotree_HighlightSyntaxAdd')
 endif
 if !exists('g:undotree_HighlightSyntaxChange')
     let g:undotree_HighlightSyntaxChange = "DiffChange"
+endif
+
+" Deprecates the old style configuration.
+if exists('g:undotree_SplitLocation')
+    echo "g:undotree_SplitLocation is deprecated,
+                \ please use g:undotree_WindowLayout instead."
 endif
 
 "Custom key mappings: add this function to your vimrc.
@@ -301,6 +355,8 @@ function! s:undotree.BindAu()
         au BufEnter <buffer> call s:exitIfLast()
         au BufEnter,BufLeave <buffer> if exists('t:undotree') |
                     \let t:undotree.width = winwidth(winnr()) | endif
+        au BufWinLeave <buffer> if exists('t:diffpanel') |
+                    \call t:diffpanel.Hide() | endif
     augroup end
 endfunction
 
@@ -468,8 +524,13 @@ function! s:undotree.Show()
     let self.targetid = w:undotree_id
 
     " Create undotree window.
-    let cmd = g:undotree_SplitLocation . " vertical" .
-                \self.width . ' new ' . self.bufname
+    if g:undotree_WindowLayout == 1 || g:undotree_WindowLayout == 2
+        let cmd = "topleft vertical" .
+                    \self.width . ' new ' . self.bufname
+    else
+        let cmd = "botright vertical" .
+                    \self.width . ' new ' . self.bufname
+    endif
     call s:exec("silent ".cmd)
     call self.SetFocus()
     setlocal winfixwidth
@@ -1105,12 +1166,14 @@ function! s:diffpanel.Show()
     " remember and restore cursor and window position.
     let savedview = winsaveview()
 
-    let sb_bak = &splitbelow
     let ei_bak= &eventignore
-    set splitbelow
     set eventignore=all
 
-    let cmd = g:undotree_DiffpanelHeight.'new '.self.bufname
+    if g:undotree_WindowLayout == 1 || g:undotree_WindowLayout == 3
+        let cmd = 'belowright '.g:undotree_DiffpanelHeight.'new '.self.bufname
+    else
+        let cmd = 'botright '.g:undotree_DiffpanelHeight.'new '.self.bufname
+    endif
     call s:exec(cmd)
 
     setlocal winfixwidth
@@ -1127,7 +1190,6 @@ function! s:diffpanel.Show()
     setlocal statusline=%!t:diffpanel.GetStatusLine()
 
     let &eventignore = ei_bak
-    let &splitbelow = sb_bak
 
     " syntax need filetype autocommand
     setfiletype diff
