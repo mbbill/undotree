@@ -1307,6 +1307,18 @@ function! UndotreeIsVisible()
     return (exists('t:undotree') && t:undotree.IsVisible())
 endfunction
 
+function! UndotreeHide()
+    if UndotreeIsVisible()
+        call UndotreeToggle()
+    endif
+endfunction
+
+function! UndotreeShow()
+    if ! UndotreeIsVisible()
+        call UndotreeToggle()
+    endif
+endfunction
+
 
 "let s:auEvents = "InsertEnter,InsertLeave,WinEnter,WinLeave,CursorMoved"
 let s:auEvents = "BufEnter,InsertLeave,CursorMoved,BufWritePost"
@@ -1315,5 +1327,7 @@ exec "au ".s:auEvents." * call UndotreeUpdate()"
 "=================================================
 " User commands.
 command! -n=0 -bar UndotreeToggle   :call UndotreeToggle()
+command! -n=0 -bar UndotreeHide     :call UndotreeHide()
+command! -n=0 -bar UndotreeShow     :call UndotreeShow()
 
 " vim: set et fdm=marker sts=4 sw=4:
