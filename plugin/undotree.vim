@@ -3,11 +3,7 @@
 " Description: Manage your undo history in a graph.
 " Author: Ming Bai <mbbill@gmail.com>
 " License: BSD
-
-" TODO status line.
-" TODO Diff between 2 specific revisions.
-" TODO support horizontal split.
-
+"
 " At least version 7.3 with 005 patch is needed for undo branches.
 " Refer to https://github.com/mbbill/undotree/issues/4 for details.
 " Thanks kien
@@ -1319,6 +1315,12 @@ function! UndotreeShow()
     endif
 endfunction
 
+function! UndotreeFocus()
+    if UndotreeIsVisible()
+        call t:undotree.SetFocus()
+    endif
+endfunction
+
 
 "let s:auEvents = "InsertEnter,InsertLeave,WinEnter,WinLeave,CursorMoved"
 let s:auEvents = "BufEnter,InsertLeave,CursorMoved,BufWritePost"
@@ -1329,5 +1331,6 @@ exec "au ".s:auEvents." * call UndotreeUpdate()"
 command! -n=0 -bar UndotreeToggle   :call UndotreeToggle()
 command! -n=0 -bar UndotreeHide     :call UndotreeHide()
 command! -n=0 -bar UndotreeShow     :call UndotreeShow()
+command! -n=0 -bar UndotreeFocus    :call UndotreeFocus()
 
 " vim: set et fdm=marker sts=4 sw=4:
