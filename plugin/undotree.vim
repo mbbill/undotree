@@ -1312,6 +1312,8 @@ endfunction
 function! UndotreeShow()
     if ! UndotreeIsVisible()
         call UndotreeToggle()
+    else
+        call t:undotree.SetFocus()
     endif
 endfunction
 
