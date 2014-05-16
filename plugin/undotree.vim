@@ -534,7 +534,7 @@ function! s:undotree.Show()
         let cmd = "botright vertical" .
                     \self.width . ' new ' . self.bufname
     endif
-    call s:exec("silent ".cmd)
+    call s:exec("silent keepalt ".cmd)
     call self.SetFocus()
     setlocal winfixwidth
     setlocal noswapfile
