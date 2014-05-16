@@ -1326,7 +1326,9 @@ endfunction
 
 "let s:auEvents = "InsertEnter,InsertLeave,WinEnter,WinLeave,CursorMoved"
 let s:auEvents = "BufEnter,InsertLeave,CursorMoved,BufWritePost"
-exec "au ".s:auEvents." * call UndotreeUpdate()"
+augroup Undotree
+    exec "au! ".s:auEvents." * call UndotreeUpdate()"
+augroup END
 
 "=================================================
 " User commands.
