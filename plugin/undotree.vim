@@ -3,7 +3,13 @@
 " Description: Manage your undo history in a graph.
 " Author: Ming Bai <mbbill@gmail.com>
 " License: BSD
-"
+
+" Avoid installing twice.
+if exists('g:loaded_undotree')
+    finish
+endif
+let g:loaded_undotree = 0
+
 " At least version 7.3 with 005 patch is needed for undo branches.
 " Refer to https://github.com/mbbill/undotree/issues/4 for details.
 " Thanks kien
@@ -15,6 +21,7 @@ if (v:version == 703 && !has("patch005"))
     command! -n=0 -bar UndotreeToggle :echoerr "undotree.vim needs vim7.3 with patch005 applied."
     finish
 endif
+let g:loaded_undotree = 1   " Signal plugin availability with a value of 1.
 
 "=================================================
 "Options:
