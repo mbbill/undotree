@@ -262,11 +262,17 @@ endfunction
 " Undotree history persistency
 if g:undotree_DirnameToSaveUndoHistory == "~/" 
   let g:undotree_DirnameToSaveUndoHistory = expand('%:h') . '/.undo_history'
-  let b:undotree_FilepathToSaveUndoHistory = expand('%:h') . '/.undo_history/' . expand('%:t')
+  let b:undotree_FilepathToSaveUndoHistory = expand('%:h') 
+      \. '/.undo_history/'
+      \. expand('%:t')
+      \. '.undocache'
   au BufReadPost * call ReadUndoFromCurrentPath()
   au BufWritePost * call WriteUndoToCurrentPath()
 else 
-  let b:undotree_FilepathToSaveUndoHistory = g:undotree_DirnameToSaveUndoHistory . '/' . expand ('%:t')
+  let b:undotree_FilepathToSaveUndoHistory = g:undotree_DirnameToSaveUndoHistory
+      \. '/'
+      \. expand ('%:t')
+      \. '.undocache'
   au BufReadPost * call ReadUndoFromCustomPath()
   au BufWritePost * call WriteUndoToCustomPath()
 endif
@@ -280,7 +286,7 @@ endfunction
 
 function WriteUndoToCurrentPath()
   if !isdirectory(g:undotree_DirnameToSaveUndoHistory)
-    call mkdir(g:undotree_DirnameToSaveUndoHistory)
+    call mkdir(g:undotree_DirnameToSaveUndoHistory , "p", 0700) " $(mkdir -p) and readable only by user
   endif
   execute "wundo" b:undotree_FilepathToSaveUndoHistory
 endfunction
