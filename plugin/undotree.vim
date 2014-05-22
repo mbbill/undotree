@@ -128,6 +128,11 @@ if !exists('g:undotree_HighlightSyntaxChange')
     let g:undotree_HighlightSyntaxChange = "DiffChange"
 endif
 
+" path to save undo history
+if !exists('g:undotree_DirnameToSaveUndoHistory')
+    let g:undotree_DirnameToSaveUndoHistory = "~/"
+endif
+
 " Deprecates the old style configuration.
 if exists('g:undotree_SplitLocation')
     echo "g:undotree_SplitLocation is deprecated,
@@ -251,6 +256,64 @@ function! s:log(msg)
         silent echon strftime('%H:%M:%S') . ': ' . a:msg . "\n"
         redir END
     endif
+endfunction
+
+"=================================================
+" Undotree history persistency
+if g:undotree_DirnameToSaveUndoHistory == "~/" 
+  let g:undotree_DirnameToSaveUndoHistory = expand('%:h') . '/.undo_history'
+  let b:undotree_FilepathToSaveUndoHistory = expand('%:h') . '/.undo_history/' . expand('%:t')
+  au BufReadPost * call ReadUndoFromCurrentPath()
+  au BufWritePost * call WriteUndoToCurrentPath()
+else 
+  let b:undotree_FilepathToSaveUndoHistory = g:undotree_DirnameToSaveUndoHistory . '/' . expand ('%:t')
+  au BufReadPost * call ReadUndoFromCustomPath()
+  au BufWritePost * call WriteUndoToCustomPath()
+endif
+
+" undo history persistency option #1: save in currently working path
+function ReadUndoFromCurrentPath()
+  if filereadable(b:undotree_FilepathToSaveUndoHistory)
+    execute "rundo" b:undotree_FilepathToSaveUndoHistory
+  endif
+endfunction
+
+function WriteUndoToCurrentPath()
+  if !isdirectory(g:undotree_DirnameToSaveUndoHistory)
+    call mkdir(g:undotree_DirnameToSaveUndoHistory)
+  endif
+  execute "wundo" b:undotree_FilepathToSaveUndoHistory
+endfunction
+
+" undo history persistency option #2: save in custom path
+function ReadUndoFromCustomPath()
+  if filereadable(b:undotree_FilepathToSaveUndoHistory)
+      execute "rundo" b:undotree_FilepathToSaveUndoHistory
+  endif
+endfunction
+
+function WriteUndoToCustomPath()
+  if !isdirectory(g:undotree_DirnameToSaveUndoHistory)
+    echom "UndoTree: "
+        \. g:undotree_DirnameToSaveUndoHistory
+        \ . " doesn't exist. To change its path, modify in undotree.vimrc file."
+
+    " prompt yes or no to create directory. create if yes
+    let l:prompt_yes_or_no = "nil" " initialize
+    while l:prompt_yes_or_no != "yes" && l:prompt_yes_or_no != "no"
+      call inputsave()
+      let l:prompt_yes_or_no = input("UndoTree: Create above directory and save your undo history in it (yes/no)? " )
+      call inputrestore()
+      if l:prompt_yes_or_no == "yes"
+          call mkdir(g:undotree_DirnameToSaveUndoHistory , "p", 0700) " $(mkdir -p) and readable only by user
+      else
+        return
+      endif
+    endwhile
+
+    " write undo
+    execute "wundo" b:undotree_FilepathToSaveUndoHistory
+  endif
 endfunction
 
 "=================================================

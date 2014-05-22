@@ -36,15 +36,15 @@ Now this plug-in will free you from those commands and bring back the power of u
  1. There are some hotkeys provided by vim to switch between the changes in history, like `u`, `<ctrl-r>`, `g+`, `g-` as well as the `:earlier` and `:later` commands.
  1. You may also switch to undotree panel and use the hotkeys to switch between history versions. Press `?` in undotree window for quick help of hotkeys.
  1. You can monitor the changed text in diff panel which is automatically updated when undo/redo happens.
- 1. Persistent undo
-    * It is highly recommend to enable the persistent undo. If you don't like your working directory be messed up with the undo file everywhere, you may add the following line to your *vimrc* in order to make them stored together.
+ 1. Persistent Undo (Vim 7.3 with patch005 or Vim 7.4+ required)
+    By default, undo history will be saved to currently working directory under `.undo_history` directory. For example, let's say you're working on a `.vimrc` file, located under `~/`. Then, the following file will be created to save undo history:
 
-// In your vimrc
+        ~/.undo_history/.vimrc
 
-    if has("persistent_undo")
-        set undodir = '~/.undodir/'
-        set undofile
-    endif
+    To save all undo history at your desired directory, please modify the path below and add it to your `.vimrc`: 
+
+        " save all undo history in this location
+        let g:undotree_DirnameToSaveUndoHistory= '/full/path/to/save/undo/history' 
 
 ### Configuration
  1. Basically, you do not need any configuration to let it work, cool?
