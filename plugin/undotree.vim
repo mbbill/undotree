@@ -139,8 +139,8 @@ endif
 "will be called after undotree window initialized.
 "
 "function g:undotree_CustomMap()
-"    map <c-n> J
-"    map <c-p> K
+"    map <buffer> <c-n> J
+"    map <buffer> <c-p> K
 "endfunction
 
 "=================================================
