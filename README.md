@@ -15,6 +15,7 @@ Now this plug-in will free you from those commands and bring back the power of u
     * The next change that will be restored by `:redo` or `<ctrl-r>` is marked as **{seq}**, it's the same as *curhead* returned by *undotree()*
     * The **[seq]** marks the last change and where further changes will be added, it's the same as *newhead* returned by *undotree()*
     * Saved changes are marked as **s** and the capitalized **S** indicates the last saved change.
+ 1. Monitor the changed text in diff panel which is automatically updated when undo/redo happens.
  1. Live updated diff panel.
  1. Highlight for added and changed text.
  1. Revert to a specific change by a single mouse click or key stroke.
@@ -28,28 +29,52 @@ Now this plug-in will free you from those commands and bring back the power of u
  1. It's highly recommend using **pathogen** or **Vundle** to manage your plug-ins.
 
 ### Usage
- 1. Use `:UndotreeToggle` to toggle the undo-tree panel. You may want to map this command to whatever hotkey by adding the following line to your vimrc, take F5 for example.
 
-    nnoremap    &lt;F5&gt;    :UndotreeToggle&lt;cr&gt;
+1. #### Toggle Undotree Window
+	
+	In command mode, type `:UndotreeToggle` to toggle the undo-tree panel. 
+	
+2. #### Use default vim hotkeys:
+ 
+ 		`u`				# undo last command
+ 		`<ctrl-r>`		# redo last command
+ 		`g+`			# Go to newer text state.  With a count repeat that many times.  {not in Vi}
+ 		`g-`			# Go to older text state.  With a count repeat that times.  {not in Vi}
+ 		`:earlier`		# Go to older text state {count} times.
+ 		`:later`		# Go to newer text state {count} times.
+ 		# For more information, refer to `:h undo`
+ 		# Or, Press '?' in Undotree Window
+	
+### Settings & Configurations
 
- 1. Then you can try to do some modification, and the undo tree will automatically updated afterwards.
- 1. There are some hotkeys provided by vim to switch between the changes in history, like `u`, `<ctrl-r>`, `g+`, `g-` as well as the `:earlier` and `:later` commands.
- 1. You may also switch to undotree panel and use the hotkeys to switch between history versions. Press `?` in undotree window for quick help of hotkeys.
- 1. You can monitor the changed text in diff panel which is automatically updated when undo/redo happens.
- 1. Persistent Undo (Vim 7.3 with patch005 or Vim 7.4+ required)
-    By default, undo history will be saved to currently working directory under `.undo_history` directory. For example, let's say you're working on a `.vimrc` file, located under `~/`. Then, the following file will be created to save undo history:
+1. ### Keymap
 
-        ~/.undo_history/.vimrc
+	Map <F5> to toggle undotree view:
+	
+    	nnoremap <F5> :UndotreeToggle<cr
+2. ### Undo History Persistency (Vim 7.3 with patch005 or Vim 7.4+ required)
+ 
+   #### Option #1: save to current directory
+   By default, undo history will be saved to currently working directory under `.undo_history` directory. For example, let's say 	you're working on a `.vimrc` file, located under `~/`. Then, the following file will be created to save undo history:
 
+        ~/.undo_history/.vimrc.undocache
+
+    
+    ![undo_persistency](https://raw.githubusercontent.com/melvkim/resource/master/screencast/undotree/undotree_persistency.gif)
+    
+   #### Option #2: save to custom location
+    
+    
     To save all undo history at your desired directory, please modify the path below and add it to your `.vimrc`: 
 
-        " save all undo history in this location
-        let g:undotree_DirnameToSaveUndoHistory= '/full/path/to/save/undo/history' 
+    	" save all undo history in this location
+    	let g:undotree_DirnameToSaveUndoHistory= '/full/path/to/save/undo/history' 
 
-### Configuration
- 1. Basically, you do not need any configuration to let it work, cool?
- 1. But if you still want to do some customization, there is also a couple of options provided.
-    * [Here](https://github.com/mbbill/undotree/blob/master/plugin/undotree.vim#L15) is a list of these options.
+	![undo_persistency_at_custom_location](https://raw.githubusercontent.com/melvkim/resource/master/screencast/undotree/undotree_persistency_at_custom_path.gif)
+
+
+3. ### More options
+	Refer to [this](https://github.com/mbbill/undotree/blob/master/plugin/undotree.vim#L15) link for more options:
 
 ### Post any issue and feature request here:
 https://github.com/mbbill/undotree/issues
