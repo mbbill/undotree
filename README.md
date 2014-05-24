@@ -45,14 +45,16 @@ Now this plug-in will free you from those commands and bring back the power of u
  		# For more information, refer to `:h undo`
  		# Or, Press '?' in Undotree Window
 	
-### Settings & Configurations
+### Configurations
 
 1. ### Keymap
 
 	Map <F5> to toggle undotree view:
 	
-    	nnoremap <F5> :UndotreeToggle<cr
-2. ### Undo History Persistency (Vim 7.3 with patch005 or Vim 7.4+ required)
+    	nnoremap <F5> :UndotreeToggle<cr>
+    	
+2. ### Undo History Persistency 
+	(Vim 7.3 with patch005 or Vim 7.4+ required)
  
    #### Option #1: save to current directory
    By default, undo history will be saved to currently working directory under `.undo_history` directory. For example, let's say 	you're working on a `.vimrc` file, located under `~/`. Then, the following file will be created to save undo history:
@@ -68,13 +70,75 @@ Now this plug-in will free you from those commands and bring back the power of u
     To save all undo history at your desired directory, please modify the path below and add it to your `.vimrc`: 
 
     	" save all undo history in this location
-    	let g:undotree_DirnameToSaveUndoHistory= '/full/path/to/save/undo/history' 
+    	let g:persistency_DirnameToSaveUndoHistory= '/full/path/to/save/undo/history' 
 
 	![undo_persistency_at_custom_location](https://raw.githubusercontent.com/melvkim/resource/master/screencast/undotree/undotree_persistency_at_custom_path.gif)
 
 
 3. ### More options
 	Refer to [this](https://github.com/mbbill/undotree/blob/master/plugin/undotree.vim#L15) link for more options:
+
+### Example .vimrc:
+	" Undo history persistency requires Vim 7.3 with patch005.
+	" Or better, use Vim version 7.4 or higher.
+	" Check your vim version with `vim --version`
+	" save undo history at a certain location
+	let g:persistency_DirnameToSaveUndoHistory = '/Users/melvkim/.vim/cache/undo_history'
+	
+	" Uncomment below to enable confirmation prompt when making directory
+	"let g:persistency_ConfirmMkdirToSaveUndoHistory = 1
+	
+	" Window layout
+	" style 1
+	" +----------+------------------------+
+	" |          |                        |
+	" |          |                        |
+	" | undotree |                        |
+	" |          |                        |
+	" |          |                        |
+	" +----------+                        |
+	" |          |                        |
+	" |   diff   |                        |
+	" |          |                        |
+	" +----------+------------------------+
+	" Style 2
+	" +----------+------------------------+
+	" |          |                        |
+	" |          |                        |
+	" | undotree |                        |
+	" |          |                        |
+	" |          |                        |
+	" +----------+------------------------+
+	" |                                   |
+	" |   diff                            |
+	" |                                   |
+	" +-----------------------------------+
+	" Style 3
+	" +------------------------+----------+
+	" |                        |          |
+	" |                        |          |
+	" |                        | undotree |
+	" |                        |          |
+	" |                        |          |
+	" |                        +----------+
+	" |                        |          |
+	" |                        |   diff   |
+	" |                        |          |
+	" +------------------------+----------+
+	" Style 4
+	" +-----------------------++----------+
+	" |                        |          |
+	" |                        |          |
+	" |                        | undotree |
+	" |                        |          |
+	" |                        |          |
+	" +------------------------+----------+
+	" |                                   |
+	" |                            diff   |
+	" |                                   |
+	" +-----------------------------------+
+	let g:undotree_WindowLayout = 3
+
 
 ### Post any issue and feature request here:
 https://github.com/mbbill/undotree/issues
