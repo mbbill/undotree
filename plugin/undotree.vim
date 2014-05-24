@@ -129,8 +129,14 @@ if !exists('g:undotree_HighlightSyntaxChange')
 endif
 
 " path to save undo history
-if !exists('g:undotree_DirnameToSaveUndoHistory')
-    let g:undotree_DirnameToSaveUndoHistory = "~/"
+if !exists('g:persistency_DirnameToSaveUndoHistory')
+    let g:persistency_DirnameToSaveUndoHistory = "./"
+endif
+
+" Confirm before making directory to save undo history each time
+" By default, set to false.
+if !exists('g:persistency_ConfirmMkdirToSaveUndoHistory')
+    let g:persistency_ConfirmMkdirToSaveUndoHistory = 0
 endif
 
 " Deprecates the old style configuration.
@@ -260,66 +266,69 @@ endfunction
 
 "=================================================
 " Undotree history persistency
-if g:undotree_DirnameToSaveUndoHistory == "~/" 
-  let g:undotree_DirnameToSaveUndoHistory = expand('%:h') . '/.undo_history'
-  let b:undotree_FilepathToSaveUndoHistory = expand('%:h') 
-      \. '/.undo_history/'
-      \. expand('%:t')
-      \. '.undocache'
-  au BufReadPost * call ReadUndoFromCurrentPath()
-  au BufWritePost * call WriteUndoToCurrentPath()
+let s:persistency = {}
+
+if g:persistency_DirnameToSaveUndoHistory == "./" 
+    let g:persistency_DirnameToSaveUndoHistory = expand('%:h') . '/.undo_history'
+    let b:persistency_FilepathToSaveUndoHistory = expand('%:h') 
+            \. '/.undo_history/'
+            \. expand('%:t')
+            \. '.undocache'
+    au BufReadPost * call s:persistency.ReadFromCurrentPath()
+    au BufWritePost * call s:persistency.WriteToCurrentPath()
 else 
-  let b:undotree_FilepathToSaveUndoHistory = g:undotree_DirnameToSaveUndoHistory
-      \. '/'
-      \. expand ('%:t')
-      \. '.undocache'
-  au BufReadPost * call ReadUndoFromCustomPath()
-  au BufWritePost * call WriteUndoToCustomPath()
+    let b:persistency_FilepathToSaveUndoHistory = g:persistency_DirnameToSaveUndoHistory
+            \. '/'
+            \. expand ('%:t')
+            \. '.undocache'
+    au BufReadPost * call s:persistency.ReadFromCustomPath()
+    au BufWritePost * call s:persistency.WriteToCustomPath()
 endif
 
 " undo history persistency option #1: save in currently working path
-function ReadUndoFromCurrentPath()
-  if filereadable(b:undotree_FilepathToSaveUndoHistory)
-    execute "rundo" b:undotree_FilepathToSaveUndoHistory
-  endif
+function s:persistency.ReadFromCurrentPath()
+    if filereadable(b:persistency_FilepathToSaveUndoHistory)
+        execute "rundo" b:persistency_FilepathToSaveUndoHistory
+    endif
 endfunction
 
-function WriteUndoToCurrentPath()
-  if !isdirectory(g:undotree_DirnameToSaveUndoHistory)
-    call mkdir(g:undotree_DirnameToSaveUndoHistory , "p", 0700) " $(mkdir -p) and readable only by user
-  endif
-  execute "wundo" b:undotree_FilepathToSaveUndoHistory
+function s:persistency.WriteToCurrentPath()
+    if !isdirectory(g:persistency_DirnameToSaveUndoHistory)
+        " $(mkdir -p) and accessible only by user
+        call mkdir(g:persistency_DirnameToSaveUndoHistory , "p", 0700)
+    endif
+    execute "wundo" b:persistency_FilepathToSaveUndoHistory
 endfunction
 
 " undo history persistency option #2: save in custom path
-function ReadUndoFromCustomPath()
-  if filereadable(b:undotree_FilepathToSaveUndoHistory)
-      execute "rundo" b:undotree_FilepathToSaveUndoHistory
-  endif
+function s:persistency.ReadFromCustomPath()
+    if filereadable(b:persistency_FilepathToSaveUndoHistory)
+        execute "rundo" b:persistency_FilepathToSaveUndoHistory
+    endif
 endfunction
 
-function WriteUndoToCustomPath()
-  if !isdirectory(g:undotree_DirnameToSaveUndoHistory)
-    echom "UndoTree: "
-        \. g:undotree_DirnameToSaveUndoHistory
-        \ . " doesn't exist. To change its path, modify in undotree.vimrc file."
+function s:persistency.WriteToCustomPath()
+    " create directory if it doesn't exist
+    if !isdirectory(g:persistency_DirnameToSaveUndoHistory)
+        if g:persistency_ConfirmMkdirToSaveUndoHistory == 1
+            echom g:persistency_DirnameToSaveUndoHistory . " doesn't exist."
 
-    " prompt yes or no to create directory. create if yes
-    let l:prompt_yes_or_no = "nil" " initialize
-    while l:prompt_yes_or_no != "yes" && l:prompt_yes_or_no != "no"
-      call inputsave()
-      let l:prompt_yes_or_no = input("UndoTree: Create above directory and save your undo history in it (yes/no)? " )
-      call inputrestore()
-      if l:prompt_yes_or_no == "yes"
-          call mkdir(g:undotree_DirnameToSaveUndoHistory , "p", 0700) " $(mkdir -p) and readable only by user
-      else
-        return
-      endif
-    endwhile
+            " prompt yes or no to create directory. create if yes
+            let l:prompt_yes_or_no = "nil"
+            while l:prompt_yes_or_no !=? "y" && l:prompt_yes_or_no !=? "n"
+                call inputsave()
+                let l:prompt_yes_or_no = input("Make directory above and save your undo history in it (y/n)? ")
+                call inputrestore()
+                if l:prompt_yes_or_no ==? "n"
+                    return
+                endif
+            endwhile
+        endif
 
-    " write undo
-    execute "wundo" b:undotree_FilepathToSaveUndoHistory
-  endif
+        " $(mkdir -p) and accessible only by user
+        call mkdir(g:persistency_DirnameToSaveUndoHistory , "p", 0700)
+    endif
+    execute "wundo" b:persistency_FilepathToSaveUndoHistory
 endfunction
 
 "=================================================
