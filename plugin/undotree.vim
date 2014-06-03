@@ -128,6 +128,17 @@ if !exists('g:undotree_HighlightSyntaxChange')
     let g:undotree_HighlightSyntaxChange = "DiffChange"
 endif
 
+" path to save undo history
+if !exists('g:persistency_DirnameToSaveUndoHistory')
+    let g:persistency_DirnameToSaveUndoHistory = "./"
+endif
+
+" Confirm before making directory to save undo history each time
+" By default, set to false.
+if !exists('g:persistency_ConfirmMkdirToSaveUndoHistory')
+    let g:persistency_ConfirmMkdirToSaveUndoHistory = 0
+endif
+
 " Deprecates the old style configuration.
 if exists('g:undotree_SplitLocation')
     echo "g:undotree_SplitLocation is deprecated,
@@ -251,6 +262,73 @@ function! s:log(msg)
         silent echon strftime('%H:%M:%S') . ': ' . a:msg . "\n"
         redir END
     endif
+endfunction
+
+"=================================================
+" Undotree history persistency
+let s:persistency = {}
+
+if g:persistency_DirnameToSaveUndoHistory == "./" 
+    let g:persistency_DirnameToSaveUndoHistory = expand('%:h') . '/.undo_history'
+    let b:persistency_FilepathToSaveUndoHistory = expand('%:h') 
+            \. '/.undo_history/'
+            \. expand('%:t')
+            \. '.undocache'
+    au BufReadPost * call s:persistency.ReadFromCurrentPath()
+    au BufWritePost * call s:persistency.WriteToCurrentPath()
+else 
+    let b:persistency_FilepathToSaveUndoHistory = g:persistency_DirnameToSaveUndoHistory
+            \. '/'
+            \. expand ('%:t')
+            \. '.undocache'
+    au BufReadPost * call s:persistency.ReadFromCustomPath()
+    au BufWritePost * call s:persistency.WriteToCustomPath()
+endif
+
+" undo history persistency option #1: save in currently working path
+function s:persistency.ReadFromCurrentPath()
+    if filereadable(b:persistency_FilepathToSaveUndoHistory)
+        execute "rundo" b:persistency_FilepathToSaveUndoHistory
+    endif
+endfunction
+
+function s:persistency.WriteToCurrentPath()
+    if !isdirectory(g:persistency_DirnameToSaveUndoHistory)
+        " $(mkdir -p) and accessible only by user
+        call mkdir(g:persistency_DirnameToSaveUndoHistory , "p", 0700)
+    endif
+    execute "wundo" b:persistency_FilepathToSaveUndoHistory
+endfunction
+
+" undo history persistency option #2: save in custom path
+function s:persistency.ReadFromCustomPath()
+    if filereadable(b:persistency_FilepathToSaveUndoHistory)
+        execute "rundo" b:persistency_FilepathToSaveUndoHistory
+    endif
+endfunction
+
+function s:persistency.WriteToCustomPath()
+    " create directory if it doesn't exist
+    if !isdirectory(g:persistency_DirnameToSaveUndoHistory)
+        if g:persistency_ConfirmMkdirToSaveUndoHistory == 1
+            echom g:persistency_DirnameToSaveUndoHistory . " doesn't exist."
+
+            " prompt yes or no to create directory. create if yes
+            let l:prompt_yes_or_no = "nil"
+            while l:prompt_yes_or_no !=? "y" && l:prompt_yes_or_no !=? "n"
+                call inputsave()
+                let l:prompt_yes_or_no = input("Make directory above and save your undo history in it (y/n)? ")
+                call inputrestore()
+                if l:prompt_yes_or_no ==? "n"
+                    return
+                endif
+            endwhile
+        endif
+
+        " $(mkdir -p) and accessible only by user
+        call mkdir(g:persistency_DirnameToSaveUndoHistory , "p", 0700)
+    endif
+    execute "wundo" b:persistency_FilepathToSaveUndoHistory
 endfunction
 
 "=================================================
