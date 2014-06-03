@@ -1,7 +1,7 @@
 ### [Link to Vim.org](http://www.vim.org/scripts/script.php?script_id=4177)
 
 ### Screenshot
-![](http://files.myopera.com/mbbill/files/undotree.png)
+![](https://sites.google.com/site/mbbill/undotree.png)
 
 ### Description
 Vim 7.0 added a new feature named **Undo branches**. Basically it's a kind of ability to go back to the text after any change, even if they were undone. Vim stores undo history in a tree which you can browse and manipulate through a bunch of commands. But that was not enough straightforward and a bit hard to use. You may use `:help new-undo-branches` or `:help undo-tree` to get more detailed help.
