@@ -351,8 +351,8 @@ function! s:undotree.BindKey()
     for i in s:keymap
         silent exec 'nnoremap <silent> <script> <buffer> '.i[1].' :call <sid>undotreeAction("'.i[0].'")<cr>'
     endfor
-    if exists('*g:undotree_CustomMap')
-        call g:undotree_CustomMap()
+    if exists('*g:Undotree_CustomMap')
+        call g:Undotree_CustomMap()
     endif
 endfunction
 
