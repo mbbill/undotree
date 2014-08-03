@@ -218,9 +218,14 @@ function! s:gettime(time)
     endif
 endfunction
 
-" Exec without autocommands
 function! s:exec(cmd)
     call s:log("s:exec() ".a:cmd)
+    silent exe a:cmd
+endfunction
+
+" Don't trigger any events(like BufEnter which could cause redundant refresh)
+function! s:exec_silent(cmd)
+    call s:log("s:exec_silent() ".a:cmd)
     let ei_bak= &eventignore
     set eventignore=all
     silent exe a:cmd
@@ -248,7 +253,7 @@ endif
 function! s:log(msg)
     if s:debug
         exec 'redir >> ' . s:debugfile
-        silent echon strftime('%H:%M:%S') . ': ' . a:msg . "\n"
+        silent echon strftime('%H:%M:%S') . ': ' . string(a:msg) . "\n"
         redir END
     endif
 endfunction
@@ -273,7 +278,7 @@ function! s:panel.SetFocus()
     endif
     call s:log("SetFocus() winnr:".winnr." bufname:".self.bufname)
     " wincmd would cause cursor outside window.
-    call s:exec("norm! ".winnr."\<c-w>\<c-w>")
+    call s:exec_silent("norm! ".winnr."\<c-w>\<c-w>")
 endfunction
 
 function! s:panel.IsVisible()
@@ -553,12 +558,19 @@ function! s:undotree.Show()
     call self.BindKey()
     call self.BindAu()
 
-    if self.opendiff
-        call t:diffpanel.Show()
-    endif
+    let ei_bak= &eventignore
+    set eventignore=all
+
     call self.SetTargetFocus()
     let self.targetBufnr = -1 "force update
     call self.Update()
+
+    let &eventignore = ei_bak
+
+    if self.opendiff
+        call t:diffpanel.Show()
+        call self.UpdateDiff()
+    endif
 endfunction
 
 " called outside undotree window
@@ -1030,7 +1042,7 @@ function! s:diffpanel.Update(seq,targetBufnr,targetid)
             if targetWinnr == -1
                 return
             endif
-            call s:exec(targetWinnr." wincmd w")
+            call s:exec_silent(targetWinnr." wincmd w")
 
             " remember and restore cursor and window position.
             let savedview = winsaveview()
@@ -1177,7 +1189,7 @@ function! s:diffpanel.Show()
     else
         let cmd = 'botright '.g:undotree_DiffpanelHeight.'new '.self.bufname
     endif
-    call s:exec(cmd)
+    call s:exec_silent(cmd)
 
     setlocal winfixwidth
     setlocal winfixheight
@@ -1223,7 +1235,7 @@ function! s:diffpanel.CleanUpHighlight()
     " clear w:undotree_diffmatches in all windows.
     let winnum = winnr('$')
     for i in range(1,winnum)
-        call s:exec("norm! ".i."\<c-w>\<c-w>")
+        call s:exec_silent("norm! ".i."\<c-w>\<c-w>")
         if exists("w:undotree_diffmatches")
             for j in w:undotree_diffmatches
                 call matchdelete(j)
@@ -1233,7 +1245,7 @@ function! s:diffpanel.CleanUpHighlight()
     endfor
 
     "restore position
-    call s:exec("norm! ".curwinnr."\<c-w>\<c-w>")
+    call s:exec_silent("norm! ".curwinnr."\<c-w>\<c-w>")
     call winrestview(savedview)
 endfunction
 
