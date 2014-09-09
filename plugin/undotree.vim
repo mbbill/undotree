@@ -165,6 +165,8 @@ let s:keymap += [['TimestampToggle','T','Toggle relative timestamp']]
 let s:keymap += [['DiffToggle','D','Toggle diff panel']]
 let s:keymap += [['GoNext','K','Revert to next state']]
 let s:keymap += [['GoPrevious','J','Revert to previous state']]
+let s:keymap += [['GoNextSaved','<','Revert to next saved state']]
+let s:keymap += [['GoPreviousSaved','>','Revert to previous saved state']]
 let s:keymap += [['Redo','<c-r>','Redo']]
 let s:keymap += [['Undo','u','Undo']]
 let s:keymap += [['Enter','<2-LeftMouse>','Revert to current']]
@@ -435,6 +437,14 @@ endfunction
 
 function! s:undotree.ActionGoNext()
     call self.ActionInTarget('later')
+endfunction
+
+function! s:undotree.ActionGoPreviousSaved()
+    call self.ActionInTarget('earlier 1f')
+endfunction
+
+function! s:undotree.ActionGoNextSaved()
+    call self.ActionInTarget('later 1f')
 endfunction
 
 function! s:undotree.ActionDiffToggle()
