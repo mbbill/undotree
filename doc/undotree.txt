@@ -1,0 +1,271 @@
+*undotree.txt*  Display your undo history in a graph
+
+Author:         Ming Bai <mbbill AT gmail DOT COM>
+Licence:        BSD
+Homepage:       https://github.com/mbbill/undotree/
+Version:        4.3
+
+==============================================================================
+CONTENTS                                                   *undotree-contents*
+
+    1. Intro ................................ |undotree-intro|
+    2. Usage ................................ |undotree-usage|
+    3. Configuration ........................ |undotree-config|
+        3.1  undotree_WindowLayout .......... |undotree_WindowLayout|
+        3.2  undotree_SplitWidth ............ |undotree_SplitWidth|
+        3.3  undotree_DiffpanelHeight ....... |undotree_DiffpanelHeight|
+        3.4  undotree_DiffAutoOpen .......... |undotree_DiffAutoOpen|
+        3.5  undotree_SetFocusWhenToggle .... |undotree_SetFocusWhenToggle|
+        3.6  undotree_TreeNodeShape ......... |undotree_TreeNodeShape|
+        3.7  undotree_DiffCommand ........... |undotree_DiffCommand|
+        3.8  undotree_RelativeTimestamp ..... |undotree_RelativeTimestamp|
+        3.9  undotree_HighlightChangedText .. |undotree_HighlightChangedText|
+        3.10 undotree_HighlightSyntaxAdd .... |undotree_HighlightSyntaxAdd|
+             undotree_HighlightSyntaxChange . |undotree_HighlightSyntaxChange|
+        3.11 Undotree_CustomMap ............. |Undotree_CustomMap|
+    4. Bugs ................................. |undotree-bugs|
+    5. Changelog ............................ |undotree-changelog|
+    6. License .............................. |undotree-license|
+
+==============================================================================
+1. Intro                                                      *undotree-intro*
+
+Vim 7.0 added a new feature named Undo branches. Basically it's a kind of
+ability to go back to the text after any change, even if they were undone. Vim
+stores undo history in a tree which you can browse and manipulate through a
+bunch of commands. But that was not enough straightforward and a bit hard to
+use. You may use :help |new-undo-branches| or :help |undo-tree| to get more
+detailed help. Now this plug-in will free you from those commands and bring
+back the power of undo tree.
+
+==============================================================================
+2. Usage                                                      *undotree-usage*
+
+Use :UndotreeToggle to toggle the undo-tree panel. You may want to map this
+command to whatever hotkey by adding the following line to your vimrc, take F5
+for example.
+>
+    nnoremap <F5> :UndotreeToggle<cr>
+<
+Then you can try to do some modification, and the undo tree will automatically
+updated afterwards.
+
+There are some hotkeys provided by vim to switch between the changes in
+history, like |u|, |<c-r>|, |g+|, |g-| as well as the |:earlier| and |:later|
+commands.
+
+You may also switch to undotree panel and use the hotkeys to switch between
+history versions. Press ? in undotree window for quick help of hotkeys.
+
+You can monitor the changed text in diff panel which is automatically updated
+when undo/redo happens.
+
+Persistent undo.
+It is highly recommend to enable the persistent undo. If you don't like your
+working directory be messed up with the undo file everywhere, you may add the
+following line to your vimrc in order to make them stored together.
+>
+    if has("persistent_undo")
+        set undodir='~/.undodir/'
+        set undofile
+    endif
+<
+==============================================================================
+3. Configuration                                             *undotree-config*
+
+------------------------------------------------------------------------------
+3.1 g:undotree_WindowLayout                            *undotree_WindowLayout*
+
+Set the undotree window layout.
+
+Style 1
+>
+    +----------+------------------------+
+    |          |                        |
+    |          |                        |
+    | undotree |                        |
+    |          |                        |
+    |          |                        |
+    +----------+                        |
+    |          |                        |
+    |   diff   |                        |
+    |          |                        |
+    +----------+------------------------+
+<
+Style 2
+>
+    +----------+------------------------+
+    |          |                        |
+    |          |                        |
+    | undotree |                        |
+    |          |                        |
+    |          |                        |
+    +----------+------------------------+
+    |                                   |
+    |   diff                            |
+    |                                   |
+    +-----------------------------------+
+<
+Style 3
+>
+    +------------------------+----------+
+    |                        |          |
+    |                        |          |
+    |                        | undotree |
+    |                        |          |
+    |                        |          |
+    |                        +----------+
+    |                        |          |
+    |                        |   diff   |
+    |                        |          |
+    +------------------------+----------+
+<
+Style 4
+>
+    +------------------------+----------+
+    |                        |          |
+    |                        |          |
+    |                        | undotree |
+    |                        |          |
+    |                        |          |
+    +------------------------+----------+
+    |                                   |
+    |                            diff   |
+    |                                   |
+    +-----------------------------------+
+<
+Default: 1
+
+------------------------------------------------------------------------------
+3.2 g:undotree_SplitWidth                                *undotree_SplitWidth*
+
+Set the undotree window width.
+
+Default: 30
+
+------------------------------------------------------------------------------
+3.3 g:undotree_DiffpanelHeight                      *undotree_DiffpanelHeight*
+
+Set the diff window height.
+
+Default: 10
+
+------------------------------------------------------------------------------
+3.4 g:undotree_DiffAutoOpen                            *undotree_DiffAutoOpen*
+
+Set this to 1 to auto open the diff window.
+
+Default: 1
+
+------------------------------------------------------------------------------
+3.5 g:undotree_SetFocusWhenToggle                *undotree_SetFocusWhenToggle*
+
+If set to 1, the undotree window will get focus after being opened, otherwise
+focus will stay in current window.
+
+Default: 0
+
+------------------------------------------------------------------------------
+3.6 g:undotree_TreeNodeShape                          *undotree_TreeNodeShape*
+
+Set the tree node shape.
+
+Default: '*'
+
+------------------------------------------------------------------------------
+3.7 g:undotree_DiffCommand                              *undotree_DiffCommand*
+
+Set the command used to get the diff output.
+
+Default: "diff"
+
+------------------------------------------------------------------------------
+3.8 g:undotree_RelativeTimestamp                  *undotree_RelativeTimestamp*
+
+Set to 1 to use relative timestamp.
+
+Default: 1
+
+------------------------------------------------------------------------------
+3.9 g:undotree_HighlightChangedText            *undotree_HighlightChangedText*
+
+Set to 1 to highlight the changed text.
+
+Default: 1
+
+------------------------------------------------------------------------------
+3.10 g:undotree_HighlightSyntaxAdd               *undotree_HighlightSyntaxAdd*
+     g:undotree_HighlightSyntaxChange         *undotree_HighlightSyntaxChange*
+
+Set the highlight linked syntax type.
+You may chose your favorite through ":hi" command.
+
+Default: "DiffAdd" and "DiffChange"
+
+------------------------------------------------------------------------------
+3.11 g:Undotree_CustomMap                                  *Undotree_CustomMap*
+
+Define this function to create your custom key mappings. You can define
+whatever mapping as you like, this is a hook function which will be called
+after undotree window initialized.
+
+For example, add the following function in your vimrc so that you can use
+<c-n>/<c-p> to revert to previous/next state.
+>
+    function g:Undotree_CustomMap()
+        map <buffer> <c-n> J
+        map <buffer> <c-p> K
+    endfunction
+<
+==============================================================================
+4. Bugs                                                        *undotree-bugs*
+
+Post any issue and feature request here:
+https://github.com/mbbill/undotree/issues
+
+==============================================================================
+5. Changelog                                              *undotree-changelog*
+
+4.3 (2013-02-18)
+    - Several fixes and enhancements.
+
+4.2 (2012-11-24)
+    - Fixed some small issue.
+
+4.1 (2012-09-05)
+    - Enhanced tree style.
+    - Multi-window switching support.
+
+4.0 (2012-08-30)
+    - Live updated highlight for changed text.
+    - Customizable key mappings.
+    - Fixed some minor bugs.
+
+3.1 (2012-08-25)
+    - Add saved status.
+    - Add relative timestamp.
+    - Add ability of clear undo history.
+
+3.0 (2012-08-24)
+    - Add diff panel.
+    - Performance improvement.
+
+2.2 (2012-08-21)
+    - Stable version.
+
+2.1 (2012-08-20)
+    - Fixed some annoying issues.
+
+2.0 (2012-08-19)
+    - Hotkey support.
+    - Handle undo levels.
+    - Auto refresh.
+    - And so on.
+
+1.0 (2012-08-18)
+    - Initial upload
+
+==============================================================================
+6. License                                                  *undotree-license*
+
+BSD
