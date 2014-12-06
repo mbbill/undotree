@@ -171,6 +171,7 @@ let s:keymap += [['Redo','<c-r>','Redo']]
 let s:keymap += [['Undo','u','Undo']]
 let s:keymap += [['Enter','<2-LeftMouse>','Revert to current']]
 let s:keymap += [['Enter','<cr>','Revert to current']]
+let s:keymap += [['Enter','o','Revert to current']]
 
 function! s:new(obj)
     let newobj = deepcopy(a:obj)
