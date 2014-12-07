@@ -350,8 +350,15 @@ function! s:undotree.Init()
 endfunction
 
 function! s:undotree.BindKey()
+    if v:version > 703 || (v:version == 703 && has("patch1261"))
+        let map_options = '<nowait> '
+    else
+        let map_options = ''
+    endif
     for i in s:keymap
-        silent exec 'nnoremap <silent> <script> <buffer> '.i[1].' :call <sid>undotreeAction("'.i[0].'")<cr>'
+        silent exec 'nnoremap <silent> <script> <buffer> '
+            \ .map_options
+            \ .i[1].' :call <sid>undotreeAction("'.i[0].'")<cr>'
     endfor
     if exists('*g:Undotree_CustomMap')
         call g:Undotree_CustomMap()
