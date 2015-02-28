@@ -163,8 +163,8 @@ let s:keymap += [['FocusTarget','<tab>','Set Focus to editor']]
 let s:keymap += [['ClearHistory','C','Clear undo history']]
 let s:keymap += [['TimestampToggle','T','Toggle relative timestamp']]
 let s:keymap += [['DiffToggle','D','Toggle diff panel']]
-let s:keymap += [['GoNext','K','Revert to next state']]
-let s:keymap += [['GoPrevious','J','Revert to previous state']]
+let s:keymap += [['GoNextState','K','Revert to next state']]
+let s:keymap += [['GoPreviousState','J','Revert to previous state']]
 let s:keymap += [['GoNextSaved','>','Revert to next saved state']]
 let s:keymap += [['GoPreviousSaved','<','Revert to previous saved state']]
 let s:keymap += [['Redo','<c-r>','Redo']]
@@ -351,14 +351,15 @@ endfunction
 
 function! s:undotree.BindKey()
     if v:version > 703 || (v:version == 703 && has("patch1261"))
-        let map_options = '<nowait> '
+        let map_options = ' <nowait> '
     else
         let map_options = ''
     endif
+    let map_options = map_options.' <silent> <buffer> '
     for i in s:keymap
-        silent exec 'nnoremap <silent> <script> <buffer> '
-            \ .map_options
-            \ .i[1].' :call <sid>undotreeAction("'.i[0].'")<cr>'
+        silent exec 'nmap '.map_options.i[1].' <plug>Undotree'.i[0]
+        silent exec 'nnoremap '.map_options.'<plug>Undotree'.i[0]
+            \ .' :call <sid>undotreeAction("'.i[0].'")<cr>'
     endfor
     if exists('*g:Undotree_CustomMap')
         call g:Undotree_CustomMap()
@@ -438,11 +439,11 @@ function! s:undotree.ActionRedo()
     call self.ActionInTarget("redo")
 endfunction
 
-function! s:undotree.ActionGoPrevious()
+function! s:undotree.ActionGoPreviousState()
     call self.ActionInTarget('earlier')
 endfunction
 
-function! s:undotree.ActionGoNext()
+function! s:undotree.ActionGoNextState()
     call self.ActionInTarget('later')
 endfunction
 

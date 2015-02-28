@@ -205,17 +205,37 @@ Default: "DiffAdd" and "DiffChange"
 ------------------------------------------------------------------------------
 3.11 g:Undotree_CustomMap                                  *Undotree_CustomMap*
 
-Define this function to create your custom key mappings. You can define
-whatever mapping as you like, this is a hook function which will be called
-after undotree window initialized.
-
-For example, add the following function in your vimrc so that you can use
-<c-n>/<c-p> to revert to previous/next state.
+There are two ways of changing the default key mappings:
+The first way is to define global mappings as the following example:
+>
+    nmap <buffer> J <plug>UndotreeGoNextState
+    nmap <buffer> K <plug>UndotreeGoPreviousState
+<
+A better approach is to define the callback function g:Undotree_CustomMap().
+The function will be called after the undotree windows is initialized, so the
+key mappings only works on the undotree windows.
 >
     function g:Undotree_CustomMap()
-        map <buffer> <c-n> J
-        map <buffer> <c-p> K
-    endfunction
+        nmap <buffer> J <plug>UndotreeGoNextState
+        nmap <buffer> K <plug>UndotreeGoPreviousState
+    endfunc
+<
+List of the commands available for redefinition.
+>
+    <plug>UndotreeHelp
+    <plug>UndotreeClose
+    <plug>UndotreeFocusTarget
+    <plug>UndotreeClearHistory
+    <plug>UndotreeTimestampToggle
+    <plug>UndotreeDiffToggle
+    <plug>UndotreeGoNextState
+    <plug>UndotreeGoPreviousState
+    <plug>UndotreeGoNextSaved
+    <plug>UndotreeGoPreviousSaved
+    <plug>UndotreeRedo
+    <plug>UndotreeUndo
+    <plug>UndotreeEnter
+    <plug>UndotreeEnter
 <
 ==============================================================================
 4. Bugs                                                        *undotree-bugs*
