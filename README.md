@@ -44,7 +44,7 @@ Now this plug-in will free you from those commands and bring back the power of u
 // In your vimrc
 
     if has("persistent_undo")
-        set undodir='~/.undodir/'
+        set undodir=~/.undodir/
         set undofile
     endif
 
