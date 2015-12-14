@@ -138,7 +138,7 @@ endif
 "You can define whatever mapping as you like, this is a hook function which
 "will be called after undotree window initialized.
 "
-"function g:undotree_CustomMap()
+"function g:Undotree_CustomMap()
 "    map <buffer> <c-n> J
 "    map <buffer> <c-p> K
 "endfunction
