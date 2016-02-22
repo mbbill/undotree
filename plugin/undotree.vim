@@ -568,6 +568,7 @@ function! s:undotree.Show()
     setlocal nobuflisted
     setlocal nospell
     setlocal nonumber
+    setlocal norelativenumber
     setlocal cursorline
     setlocal nomodifiable
     setlocal statusline=%!t:undotree.GetStatusLine()
