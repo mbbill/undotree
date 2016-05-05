@@ -229,7 +229,7 @@ endfunction
 function! s:exec_silent(cmd)
     call s:log("s:exec_silent() ".a:cmd)
     let ei_bak= &eventignore
-    set eventignore=all
+    set eventignore=BufEnter,BufLeave,BufWinLeave,InsertLeave,CursorMoved,BufWritePost
     silent exe a:cmd
     let &eventignore = ei_bak
 endfunction
