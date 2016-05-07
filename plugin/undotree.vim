@@ -397,7 +397,7 @@ function! s:undotree.ActionInTarget(cmd)
         return
     endif
     " Target should be a normal buffer.
-    if (&bt == '') && (&modifiable == 1) && (mode() == 'n')
+    if (&bt == '' || &bt == 'acwrite') && (&modifiable == 1) && (mode() == 'n')
         call s:exec(a:cmd)
         call self.Update()
     endif
@@ -602,7 +602,7 @@ function! s:undotree.Update()
     if bufname == self.bufname || bufname == t:diffpanel.bufname
         return
     endif
-    if (&bt != '') || (&modifiable == 0) || (mode() != 'n')
+    if (&bt != '' && &bt != 'acwrite') || (&modifiable == 0) || (mode() != 'n')
         if self.targetBufnr == bufnr('%') && self.targetid == w:undotree_id
             call s:log("undotree.Update() invalid buffer NOupdate")
             return
