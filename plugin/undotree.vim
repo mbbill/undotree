@@ -603,6 +603,11 @@ function! s:undotree.Update()
         return
     endif
     if (&bt != '' && &bt != 'acwrite') || (&modifiable == 0) || (mode() != 'n')
+        if &bt == 'quickfix' || &bt == 'nofile'
+            "Do nothing for quickfix and q:
+            call s:log("undotree.Update() ignore quickfix")
+            return
+        endif
         if self.targetBufnr == bufnr('%') && self.targetid == w:undotree_id
             call s:log("undotree.Update() invalid buffer NOupdate")
             return
