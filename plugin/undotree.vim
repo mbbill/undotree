@@ -136,12 +136,29 @@ endif
 
 " Short time indicators
 if exists('g:undotree_ShortIndocators')
-    let s:timeSecond = '1 s'
+    let s:timeSecond  = '1 s'
     let s:timeSeconds = ' s'
+
+    let s:timeMinute  = '1 m'
+    let s:timeMinutes = ' m'
+
+    let s:timeHour  = '1 h'
+    let s:timeHours = ' h'
+
+    let s:timeDay  = '1 d'
+    let s:timeDays = ' d'
 else
     let s:timeSecond = '1 second ago'
     let s:timeSecondis = ' seconds ago'
 
+    let s:timeMinute  = '1 minute ago'
+    let s:timeMinutes = ' minutes ago'
+
+    let s:timeHour  = '1 hour ago'
+    let s:timeHours = ' hours ago'
+
+    let s:timeDay  = '1 day ago'
+    let s:timeDays = ' days ago'
 endif
 
 "Custom key mappings: add this function to your vimrc.
@@ -214,19 +231,19 @@ function! s:gettime(time)
         endif
         if sec < 3600
             if (sec/60) == 1
-                return '1 minute ago'
+                return s:timeMinute
             else
-                return (sec/60).' minutes ago'
+                return (sec/60).s:timeMinutes
             endif
         endif
         if sec < 86400 "3600*24
             if (sec/3600) == 1
-                return '1 hour ago'
+                return s:timeHour
             else
-                return (sec/3600).' hours ago'
+                return (sec/3600).s:timeHours
             endif
         endif
-        return (sec/86400).' days ago'
+        return (sec/86400).s:timeDays
     endif
 endfunction
 
