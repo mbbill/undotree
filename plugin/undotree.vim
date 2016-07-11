@@ -134,6 +134,16 @@ if exists('g:undotree_SplitLocation')
                 \ please use g:undotree_WindowLayout instead."
 endif
 
+" Short time indicators
+if exists('g:undotree_ShortIndocators')
+    let s:timeSecond = '1 s'
+    let s:timeSeconds = ' s'
+else
+    let s:timeSecond = '1 second ago'
+    let s:timeSecondis = ' seconds ago'
+
+endif
+
 "Custom key mappings: add this function to your vimrc.
 "You can define whatever mapping as you like, this is a hook function which
 "will be called after undotree window initialized.
@@ -197,9 +207,9 @@ function! s:gettime(time)
         endif
         if sec < 60
             if sec == 1
-                return '1 second ago'
+                return s:timeSecond
             else
-                return sec.' seconds ago'
+                return sec.s:timeSeconds
             endif
         endif
         if sec < 3600
