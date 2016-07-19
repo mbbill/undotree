@@ -81,7 +81,11 @@ endif
 
 " undotree window width
 if !exists('g:undotree_SplitWidth')
-    let g:undotree_SplitWidth = 30
+    if exists('g:undotree_ShortIndocators')
+        let g:undotree_SplitWidth = 24
+    else
+        let g:undotree_SplitWidth = 30
+    endif
 endif
 
 " diff window height
