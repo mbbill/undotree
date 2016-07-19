@@ -81,7 +81,7 @@ endif
 
 " undotree window width
 if !exists('g:undotree_SplitWidth')
-    if exists('g:undotree_ShortIndocators')
+    if exists('g:undotree_ShortIndicators')
         let g:undotree_SplitWidth = 24
     else
         let g:undotree_SplitWidth = 30
@@ -139,7 +139,7 @@ if exists('g:undotree_SplitLocation')
 endif
 
 " Short time indicators
-if exists('g:undotree_ShortIndocators')
+if exists('g:undotree_ShortIndicators')
     let s:timeSecond  = '1 s'
     let s:timeSeconds = ' s'
 
