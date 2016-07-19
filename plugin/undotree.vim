@@ -147,6 +147,8 @@ if exists('g:undotree_ShortIndocators')
 
     let s:timeDay  = '1 d'
     let s:timeDays = ' d'
+
+    let s:timeOriginal = 'Orig'
 else
     let s:timeSecond = '1 second ago'
     let s:timeSecondis = ' seconds ago'
@@ -159,6 +161,8 @@ else
 
     let s:timeDay  = '1 day ago'
     let s:timeDays = ' days ago'
+
+    let s:timeOriginal = 'Original'
 endif
 
 "Custom key mappings: add this function to your vimrc.
@@ -208,7 +212,7 @@ endfunction
 " Get formatted time
 function! s:gettime(time)
     if a:time == 0
-        return "Original"
+        return s:timeOriginal
     endif
     if !g:undotree_RelativeTimestamp
         let today = substitute(strftime("%c",localtime())," .*$",'','g')
