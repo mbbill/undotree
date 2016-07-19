@@ -155,7 +155,7 @@ if exists('g:undotree_ShortIndicators')
     let s:timeOriginal = 'Orig'
 else
     let s:timeSecond = '1 second ago'
-    let s:timeSecondis = ' seconds ago'
+    let s:timeSeconds = ' seconds ago'
 
     let s:timeMinute  = '1 minute ago'
     let s:timeMinutes = ' minutes ago'
