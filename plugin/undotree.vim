@@ -81,7 +81,11 @@ endif
 
 " undotree window width
 if !exists('g:undotree_SplitWidth')
-    let g:undotree_SplitWidth = 30
+    if exists('g:undotree_ShortIndicators')
+        let g:undotree_SplitWidth = 24
+    else
+        let g:undotree_SplitWidth = 30
+    endif
 endif
 
 " diff window height
@@ -134,6 +138,37 @@ if exists('g:undotree_SplitLocation')
                 \ please use g:undotree_WindowLayout instead."
 endif
 
+" Short time indicators
+if exists('g:undotree_ShortIndicators')
+    let s:timeSecond  = '1 s'
+    let s:timeSeconds = ' s'
+
+    let s:timeMinute  = '1 m'
+    let s:timeMinutes = ' m'
+
+    let s:timeHour  = '1 h'
+    let s:timeHours = ' h'
+
+    let s:timeDay  = '1 d'
+    let s:timeDays = ' d'
+
+    let s:timeOriginal = 'Orig'
+else
+    let s:timeSecond = '1 second ago'
+    let s:timeSecondis = ' seconds ago'
+
+    let s:timeMinute  = '1 minute ago'
+    let s:timeMinutes = ' minutes ago'
+
+    let s:timeHour  = '1 hour ago'
+    let s:timeHours = ' hours ago'
+
+    let s:timeDay  = '1 day ago'
+    let s:timeDays = ' days ago'
+
+    let s:timeOriginal = 'Original'
+endif
+
 "Custom key mappings: add this function to your vimrc.
 "You can define whatever mapping as you like, this is a hook function which
 "will be called after undotree window initialized.
@@ -181,7 +216,7 @@ endfunction
 " Get formatted time
 function! s:gettime(time)
     if a:time == 0
-        return "Original"
+        return s:timeOriginal
     endif
     if !g:undotree_RelativeTimestamp
         let today = substitute(strftime("%c",localtime())," .*$",'','g')
@@ -197,26 +232,26 @@ function! s:gettime(time)
         endif
         if sec < 60
             if sec == 1
-                return '1 second ago'
+                return s:timeSecond
             else
-                return sec.' seconds ago'
+                return sec.s:timeSeconds
             endif
         endif
         if sec < 3600
             if (sec/60) == 1
-                return '1 minute ago'
+                return s:timeMinute
             else
-                return (sec/60).' minutes ago'
+                return (sec/60).s:timeMinutes
             endif
         endif
         if sec < 86400 "3600*24
             if (sec/3600) == 1
-                return '1 hour ago'
+                return s:timeHour
             else
-                return (sec/3600).' hours ago'
+                return (sec/3600).s:timeHours
             endif
         endif
-        return (sec/86400).' days ago'
+        return (sec/86400).s:timeDays
     endif
 endfunction
 
