@@ -79,9 +79,14 @@ if !exists('g:undotree_WindowLayout')
     let g:undotree_WindowLayout = 1
 endif
 
+" e.g. using 'd' instead of 'days' to save some space.
+if !exists('g:undotree_ShortIndicators')
+    let g:undotree_ShortIndicators = 0
+endif
+
 " undotree window width
 if !exists('g:undotree_SplitWidth')
-    if exists('g:undotree_ShortIndicators')
+    if g:undotree_ShortIndicators == 1
         let g:undotree_SplitWidth = 24
     else
         let g:undotree_SplitWidth = 30
@@ -139,7 +144,7 @@ if exists('g:undotree_SplitLocation')
 endif
 
 " Short time indicators
-if exists('g:undotree_ShortIndicators')
+if g:undotree_ShortIndicators == 1
     let s:timeSecond  = '1 s'
     let s:timeSeconds = ' s'
 
@@ -251,7 +256,11 @@ function! s:gettime(time)
                 return (sec/3600).s:timeHours
             endif
         endif
-        return (sec/86400).s:timeDays
+        if (sec/86400) == 1
+            return s:timeDay
+        else
+            return (sec/86400).s:timeDays
+        endif
     endif
 endfunction
 
@@ -925,7 +934,7 @@ endfunction
 " Convert self.tree -> self.asciitree
 function! s:undotree.Render()
     " We gonna modify self.tree so we'd better make a copy first.
-    " Can not make a copy because variable nested too deep, gosh.. okay,
+    " Cannot make a copy because variable nested too deep, gosh.. okay,
     " fine..
     " let tree = deepcopy(self.tree)
     let tree = self.tree
