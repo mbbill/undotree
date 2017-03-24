@@ -64,7 +64,7 @@ https://github.com/mbbill/undotree/issues
  1. If you want to disable debug, just delete that file.
 
 ### Alternatives
-Someone asked me about the difference with [Gundo](http://sjl.bitbucket.org/gundo.vim/), here is a list of differences, or advantages.
+Someone asked me about the difference with [Gundo](https://bitbucket.org/sjl/gundo.vim/), here is a list of differences, or advantages.
  1. Pure vimscript implementation and no 3rd-party libraries(like python) is needed, don't worry about performance, it's not such a big deal for vim to handle this. The only dependency is the 'diff' tool which always shipped with vim and even without 'diff' you still can use most of the features of this script.
  1. Realtime updated undo tree. Once you make changes, the undo tree will be updated simultaneously.
  1. Several useful marks, like current changeset, next redo changeset, saved changeset, etc.
