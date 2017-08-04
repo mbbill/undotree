@@ -517,7 +517,7 @@ function! s:undotree.ActionTimestampToggle()
 endfunction
 
 function! s:undotree.ActionClearHistory()
-    if confirm("Are you sure to clear ALL undo history?","&Yes\n&No") != 1
+    if input("Clear ALL undo history? Type \"YES\" to continue: ") != "YES"
         return
     endif
     if !self.SetTargetFocus()
@@ -1333,7 +1333,7 @@ endfunction
 function! s:undotreeAction(action)
     call s:log("undotreeAction()")
     if !exists('t:undotree')
-        echoerr "Fatal: t:undotree does not exists!"
+        echoerr "Fatal: t:undotree does not exist!"
         return
     endif
     call t:undotree.Action(a:action)
