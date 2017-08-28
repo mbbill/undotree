@@ -753,7 +753,7 @@ endfunction
 function! s:undotree.Screen2Index(line)
     let index_padding = 1
     let empty_line = 1
-    let index = a:index - index_padding - empty_line
+    let index = a:line - index_padding - empty_line
 
     if self.showHelp
         let index -= len(s:keymap) + len(s:helpmore)
