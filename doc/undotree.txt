@@ -24,6 +24,7 @@ CONTENTS                                                   *undotree-contents*
         3.11 undotree_HighlightSyntaxAdd .... |undotree_HighlightSyntaxAdd|
              undotree_HighlightSyntaxChange . |undotree_HighlightSyntaxChange|
         3.12 Undotree_CustomMap ............. |Undotree_CustomMap|
+        3.13 undotree_HelpLine .............. |undotree_HelpLine|
     4. Bugs ................................. |undotree-bugs|
     5. Changelog ............................ |undotree-changelog|
     6. License .............................. |undotree-license|
@@ -258,6 +259,13 @@ List of the commands available for redefinition.
     <plug>UndotreeEnter
     <plug>UndotreeEnter
 <
+
+------------------------------------------------------------------------------
+3.13 g:undotree_HelpLine                                   *undotree_HelpLine*
+
+Set to 0 to hide "Press ? for help".
+
+Default: 1
 ==============================================================================
 4. Bugs                                                        *undotree-bugs*
 

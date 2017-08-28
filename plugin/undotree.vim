@@ -143,6 +143,11 @@ if exists('g:undotree_SplitLocation')
                 \ please use g:undotree_WindowLayout instead."
 endif
 
+" Show help line
+if !exists('g:undotree_HelpLine')
+    let g:undotree_HelpLine = 1
+endif
+
 " Short time indicators
 if g:undotree_ShortIndicators == 1
     let s:timeSecond  = '1 s'
@@ -192,7 +197,11 @@ let s:helpmore = ['"    ===== Marks ===== ',
             \'"   s   : saved changes',
             \'"   S   : last saved change',
             \'"   ===== Hotkeys =====']
-let s:helpless = ['" Press ? for help.']
+if !g:undotree_HelpLine
+    let s:helpless = []
+else
+    let s:helpless = ['" Press ? for help.']
+endif
 
 " Keymap
 let s:keymap = []
@@ -708,35 +717,51 @@ function! s:undotree.Update()
 endfunction
 
 function! s:undotree.AppendHelp()
-    call append(0,'') "empty line
     if self.showHelp
+        call append(0,'') "empty line
         for i in s:keymap
             call append(0,'" '.i[1].' : '.i[2])
         endfor
         call append(0,s:helpmore)
     else
+        if g:undotree_HelpLine
+            call append(0,'')
+        endif
         call append(0,s:helpless)
     endif
 endfunction
 
 function! s:undotree.Index2Screen(index)
+    " index starts from zero
+    let index_padding = 1
+    let empty_line = 1
+    let lineNr = a:index + index_padding + empty_line
     " calculate line number according to the help text.
     " index starts from zero and lineNr starts from 1
     if self.showHelp
-        " 2 means 1 empty line + 1 index padding (index starts from zero)
-        let lineNr = a:index + len(s:keymap) + len(s:helpmore) + 2
+        let lineNr += len(s:keymap) + len(s:helpmore)
     else
-        let lineNr = a:index + len(s:helpless) + 2
+        let lineNr += len(s:helpless)
+        if !g:undotree_HelpLine
+            let lineNr -= empty_line
+        endif
     endif
     return lineNr
 endfunction
 
 " <0 if index is invalid. e.g. current line is in help text.
 function! s:undotree.Screen2Index(line)
+    let index_padding = 1
+    let empty_line = 1
+    let index = a:index - index_padding - empty_line
+
     if self.showHelp
-        let index = a:line - len(s:keymap) - len(s:helpmore) - 2
+        let index -= len(s:keymap) + len(s:helpmore)
     else
-        let index = a:line - len(s:helpless) - 2
+        let index -= len(s:helpless)
+        if !g:undotree_HelpLine
+            let index += empty_line
+        endif
     endif
     return index
 endfunction
