@@ -1,5 +1,5 @@
 "=================================================
-" File: undotree.vim
+" File: plugin/undotree.vim
 " Description: Manage your undo history in a graph.
 " Author: Ming Bai <mbbill@gmail.com>
 " License: BSD
