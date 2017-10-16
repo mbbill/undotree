@@ -321,3 +321,5 @@ https://github.com/mbbill/undotree/issues
 6. License                                                  *undotree-license*
 
 BSD
+
+ vim:tw=78:ts=8:ft=help:norl:
