@@ -275,6 +275,9 @@ https://github.com/mbbill/undotree/issues
 ==============================================================================
 5. Changelog                                              *undotree-changelog*
 
+4.4 (2017-10-15)
+    - Autoload plugin functions
+
 4.3 (2013-02-18)
     - Several fixes and enhancements.
 
