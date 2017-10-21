@@ -12,19 +12,21 @@ CONTENTS                                                   *undotree-contents*
     2. Usage ................................ |undotree-usage|
     3. Configuration ........................ |undotree-config|
         3.1  undotree_WindowLayout .......... |undotree_WindowLayout|
-        3.2  undotree_SplitWidth ............ |undotree_SplitWidth|
-        3.3  undotree_DiffpanelHeight ....... |undotree_DiffpanelHeight|
-        3.4  undotree_DiffAutoOpen .......... |undotree_DiffAutoOpen|
-        3.5  undotree_SetFocusWhenToggle .... |undotree_SetFocusWhenToggle|
-        3.6  undotree_TreeNodeShape ......... |undotree_TreeNodeShape|
-        3.7  undotree_DiffCommand ........... |undotree_DiffCommand|
-        3.8  undotree_RelativeTimestamp ..... |undotree_RelativeTimestamp|
-        3.9  undotree_ShortIndicators ....... |undotree_ShortIndicators|
-        3.10 undotree_HighlightChangedText .. |undotree_HighlightChangedText|
-        3.11 undotree_HighlightSyntaxAdd .... |undotree_HighlightSyntaxAdd|
+        3.2  undotree_CustomUndotreeCmd...... |undotree_CustomUndotreeCmd|
+             undotree_CustomDiffpanelCmd..... |undotree_CustomDiffpanelCmd|
+        3.3  undotree_SplitWidth ............ |undotree_SplitWidth|
+        3.4  undotree_DiffpanelHeight ....... |undotree_DiffpanelHeight|
+        3.5  undotree_DiffAutoOpen .......... |undotree_DiffAutoOpen|
+        3.6  undotree_SetFocusWhenToggle .... |undotree_SetFocusWhenToggle|
+        3.7  undotree_TreeNodeShape ......... |undotree_TreeNodeShape|
+        3.8  undotree_DiffCommand ........... |undotree_DiffCommand|
+        3.9  undotree_RelativeTimestamp ..... |undotree_RelativeTimestamp|
+        3.10 undotree_ShortIndicators ....... |undotree_ShortIndicators|
+        3.11 undotree_HighlightChangedText .. |undotree_HighlightChangedText|
+        3.12 undotree_HighlightSyntaxAdd .... |undotree_HighlightSyntaxAdd|
              undotree_HighlightSyntaxChange . |undotree_HighlightSyntaxChange|
-        3.12 Undotree_CustomMap ............. |Undotree_CustomMap|
-        3.13 undotree_HelpLine .............. |undotree_HelpLine|
+        3.13 Undotree_CustomMap ............. |Undotree_CustomMap|
+        3.14 undotree_HelpLine .............. |undotree_HelpLine|
     4. Bugs ................................. |undotree-bugs|
     5. Changelog ............................ |undotree-changelog|
     6. License .............................. |undotree-license|
@@ -139,28 +141,113 @@ Style 4
 Default: 1
 
 ------------------------------------------------------------------------------
-3.2 g:undotree_SplitWidth                                *undotree_SplitWidth*
+3.2  g:undotree_CustomUndotreeCmd                 *undotree_CustomUndotreeCmd*
+     g:undotree_CustomDiffpanelCmd               *undotree_CustomDiffpanelCmd*
+
+Set up custom window layout.
+
+Setting |undotree_CustomUndotreeCmd|  will ignore |undotree_SplitWidth|, and
+setting |undotree_CustomDiffpanelCmd| will ignore |undotree_DiffpanelHeight|.
+
+An |undotree_CustomUndotreeCmd| will always open the undotree window relative
+to the tracked window and |undotree_CustomDiffpanelCmd| will always open the
+diffpanel relative to the undotree window.
+
+Useful when
+
+  * absolute positioning commands (|topleft|, |botright|) don't play well
+    with other plugins
+
+  * you have a preferred split window layout and would like to use
+    UndoTree relative to one specific window only
+
+Examples:
+
+  * To recreate Style 1:
+>
+    let g:undotree_CustomUndotreeCmd  = 'topleft vertical 30 new'
+    let g:undotree_CustomDiffpanelCmd = 'belowright 10 new'
+<
+  * To recreate Style 2:
+>
+    let g:undotree_CustomUndotreeCmd  = 'topleft vertical 30 new'
+    let g:undotree_CustomDiffpanelCmd = 'botright 10 new'
+<
+  * A custom layout example:
+>
+    +------------------------+----------+
+    |                        |          |
+    |                        |    w     |
+    |                        |    i     |
+    |                        |    n     |
+    |   window_1             |    d     |
+    |                        |    o     |
+    |                        |    w     |
+    |                        |    |     |
+    |                        |    2     |
+    |                        |          |
+    +------------------------+----------+
+    |                                   |
+    |         window_3                  |
+    |                                   |
+    +-----------------------------------+
+<
+    Using the following setup wouldn't mess up the current layout as it
+    does not use absolute positioning:
+>
+    let g:undotree_CustomUndotreeCmd = 'vertical 32 new'
+    let g:undotree_CustomDiffpanelCmd= 'belowright 12 new'
+<
+    Issuing :UndotreeToggle now in window_1 would result in:
+>
+    +--------+---------------+----------+
+    |        |               |          |
+    |   u    |               |    w     |
+    |   n    |               |    i     |
+    |   d    |               |    n     |
+    |   o    |   window_1    |    d     |
+    |        |               |    o     |
+    +--------+               |    w     |
+    |        |               |    |     |
+    |  diff  |               |    2     |
+    |        |               |          |
+    +--------+---------------+----------+
+    |                                   |
+    |         window_3                  |
+    |                                   |
+    +-----------------------------------+
+<
+    Executing :UndotreeToggle again would turn off UndoTree (independently
+    of which window was active at the time). Moving between window1, window_2
+    and window_3 would result in showing the respective window's changelog
+    in the undotree panel.
+
+    CAVEAT: To avoid the Vim's default behaviour of equalizing window sizes
+            when closing a window, set the 'noequalalways' option.
+
+------------------------------------------------------------------------------
+3.3 g:undotree_SplitWidth                                *undotree_SplitWidth*
 
 Set the undotree window width.
 
 Default: 30
 
 ------------------------------------------------------------------------------
-3.3 g:undotree_DiffpanelHeight                      *undotree_DiffpanelHeight*
+3.4 g:undotree_DiffpanelHeight                      *undotree_DiffpanelHeight*
 
 Set the diff window height.
 
 Default: 10
 
 ------------------------------------------------------------------------------
-3.4 g:undotree_DiffAutoOpen                            *undotree_DiffAutoOpen*
+3.5 g:undotree_DiffAutoOpen                            *undotree_DiffAutoOpen*
 
 Set this to 1 to auto open the diff window.
 
 Default: 1
 
 ------------------------------------------------------------------------------
-3.5 g:undotree_SetFocusWhenToggle                *undotree_SetFocusWhenToggle*
+3.6 g:undotree_SetFocusWhenToggle                *undotree_SetFocusWhenToggle*
 
 If set to 1, the undotree window will get focus after being opened, otherwise
 focus will stay in current window.
@@ -168,28 +255,28 @@ focus will stay in current window.
 Default: 0
 
 ------------------------------------------------------------------------------
-3.6 g:undotree_TreeNodeShape                          *undotree_TreeNodeShape*
+3.7 g:undotree_TreeNodeShape                          *undotree_TreeNodeShape*
 
 Set the tree node shape.
 
 Default: '*'
 
 ------------------------------------------------------------------------------
-3.7 g:undotree_DiffCommand                              *undotree_DiffCommand*
+3.8 g:undotree_DiffCommand                              *undotree_DiffCommand*
 
 Set the command used to get the diff output.
 
 Default: "diff"
 
 ------------------------------------------------------------------------------
-3.8 g:undotree_RelativeTimestamp                  *undotree_RelativeTimestamp*
+3.9 g:undotree_RelativeTimestamp                  *undotree_RelativeTimestamp*
 
 Set to 1 to use relative timestamp.
 
 Default: 1
 
 ------------------------------------------------------------------------------
-3.9 g:undotree_ShortIndicators                      *undotree_ShortIndicators*
+3.10 g:undotree_ShortIndicators                      *undotree_ShortIndicators*
 
 Set to 1 to get short timestamps when |undotree_RelativeTimestamp| is also
 enabled:
@@ -209,14 +296,14 @@ enabled:
 Default: 0
 
 ------------------------------------------------------------------------------
-3.10 g:undotree_HighlightChangedText           *undotree_HighlightChangedText*
+3.11 g:undotree_HighlightChangedText           *undotree_HighlightChangedText*
 
 Set to 1 to highlight the changed text.
 
 Default: 1
 
 ------------------------------------------------------------------------------
-3.11 g:undotree_HighlightSyntaxAdd               *undotree_HighlightSyntaxAdd*
+3.12 g:undotree_HighlightSyntaxAdd               *undotree_HighlightSyntaxAdd*
      g:undotree_HighlightSyntaxChange         *undotree_HighlightSyntaxChange*
 
 Set the highlight linked syntax type.
@@ -225,7 +312,7 @@ You may chose your favorite through ":hi" command.
 Default: "DiffAdd" and "DiffChange"
 
 ------------------------------------------------------------------------------
-3.12 g:Undotree_CustomMap                                 *Undotree_CustomMap*
+3.13 g:Undotree_CustomMap                                 *Undotree_CustomMap*
 
 There are two ways of changing the default key mappings:
 The first way is to define global mappings as the following example:
@@ -261,7 +348,7 @@ List of the commands available for redefinition.
 <
 
 ------------------------------------------------------------------------------
-3.13 g:undotree_HelpLine                                   *undotree_HelpLine*
+3.14 g:undotree_HelpLine                                   *undotree_HelpLine*
 
 Set to 0 to hide "Press ? for help".
 

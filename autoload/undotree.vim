@@ -477,7 +477,10 @@ function! s:undotree.Show()
     let self.targetid = w:undotree_id
 
     " Create undotree window.
-    if g:undotree_WindowLayout == 1 || g:undotree_WindowLayout == 2
+    if exists("g:undotree_CustomUndotreeCmd")
+        let cmd = g:undotree_CustomUndotreeCmd . ' ' .
+                    \self.bufname
+    elseif g:undotree_WindowLayout == 1 || g:undotree_WindowLayout == 2
         let cmd = "topleft vertical" .
                     \self.width . ' new ' . self.bufname
     else
@@ -1150,7 +1153,9 @@ function! s:diffpanel.Show()
     let ei_bak= &eventignore
     set eventignore=all
 
-    if g:undotree_WindowLayout == 1 || g:undotree_WindowLayout == 3
+    if exists("g:undotree_CustomDiffpanelCmd")
+        let cmd = g:undotree_CustomDiffpanelCmd.' '.self.bufname
+    elseif g:undotree_WindowLayout == 1 || g:undotree_WindowLayout == 3
         let cmd = 'belowright '.g:undotree_DiffpanelHeight.'new '.self.bufname
     else
         let cmd = 'botright '.g:undotree_DiffpanelHeight.'new '.self.bufname
