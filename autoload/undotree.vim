@@ -1310,7 +1310,7 @@ function! undotree#UndotreeShow()
 endfunction
 
 function! undotree#UndotreeFocus()
-    if UndotreeIsVisible()
+    if undotree#UndotreeIsVisible()
         call t:undotree.SetFocus()
     endif
 endfunction
