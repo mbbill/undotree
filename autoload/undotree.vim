@@ -441,16 +441,26 @@ function! s:undotree.SetTargetFocus()
 endfunction
 
 function! s:undotree.Toggle()
+    "Global auto commands to keep undotree up to date.
+    let auEvents = "BufEnter,InsertLeave,CursorMoved,BufWritePost"
+
     call s:log(self.bufname." Toggle()")
     if self.IsVisible()
         call self.Hide()
         call t:diffpanel.Hide()
         call self.SetTargetFocus()
+        augroup Undotree
+            autocmd!
+        augroup END
     else
         call self.Show()
         if !g:undotree_SetFocusWhenToggle
             call self.SetTargetFocus()
         endif
+        augroup Undotree
+            au!
+            exec "au! ".auEvents." * call undotree#UndotreeUpdate()"
+        augroup END
     endif
 endfunction
 

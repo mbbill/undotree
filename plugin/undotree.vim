@@ -148,12 +148,6 @@ if !exists('g:undotree_HelpLine')
     let g:undotree_HelpLine = 1
 endif
 
-"let s:auEvents = "InsertEnter,InsertLeave,WinEnter,WinLeave,CursorMoved"
-let s:auEvents = "BufEnter,InsertLeave,CursorMoved,BufWritePost"
-augroup Undotree
-    exec "au! ".s:auEvents." * call undotree#UndotreeUpdate()"
-augroup END
-
 "=================================================
 " User commands.
 command! -n=0 -bar UndotreeToggle   :call undotree#UndotreeToggle()
