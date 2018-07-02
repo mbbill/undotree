@@ -55,11 +55,11 @@ endif
 "=================================================
 " Help text
 let s:helpmore = ['"    ===== Marks ===== ',
-            \'" >num< : current change',
-            \'" {num} : change to redo',
-            \'" [num] : the last change',
-            \'"   s   : saved changes',
-            \'"   S   : last saved change',
+            \'" >num< : The current state',
+            \'" {num} : The next redo state',
+            \'" [num] : The latest state',
+            \'"   s   : Saved states',
+            \'"   S   : The last saved state',
             \'"   ===== Hotkeys =====']
 if !g:undotree_HelpLine
     let s:helpless = []
@@ -80,19 +80,19 @@ endif
 let s:keymap = []
 " action, key, help.
 let s:keymap += [['Help','?','Toggle quick help']]
-let s:keymap += [['Close','q','Close this panel']]
-let s:keymap += [['FocusTarget','<tab>','Set Focus to editor']]
-let s:keymap += [['ClearHistory','C','Clear undo history']]
+let s:keymap += [['Close','q','Close undotree panel']]
+let s:keymap += [['FocusTarget','<tab>','Set Focus back to the editor']]
+let s:keymap += [['ClearHistory','C','Clear undo history (with confirmation)']]
 let s:keymap += [['TimestampToggle','T','Toggle relative timestamp']]
-let s:keymap += [['DiffToggle','D','Toggle diff panel']]
-let s:keymap += [['GoNextState','K','Revert to next state']]
-let s:keymap += [['GoPreviousState','J','Revert to previous state']]
-let s:keymap += [['GoNextSaved','>','Revert to next saved state']]
-let s:keymap += [['GoPreviousSaved','<','Revert to previous saved state']]
+let s:keymap += [['DiffToggle','D','Toggle the diff panel']]
+let s:keymap += [['NextState','K','Move to the next undo state']]
+let s:keymap += [['PreviousState','J','Move to the previous undo state']]
+let s:keymap += [['NextSavedState','>','Move to the next saved state']]
+let s:keymap += [['PreviousSavedState','<','Move to the previous saved state']]
 let s:keymap += [['Redo','<c-r>','Redo']]
 let s:keymap += [['Undo','u','Undo']]
-let s:keymap += [['Enter','<2-LeftMouse>','Revert to current']]
-let s:keymap += [['Enter','<cr>','Revert to current']]
+let s:keymap += [['Enter','<2-LeftMouse>','Move to the current state']]
+let s:keymap += [['Enter','<cr>','Move to the current state']]
 
 "=================================================
 function! s:new(obj)
@@ -366,19 +366,19 @@ function! s:undotree.ActionRedo()
     call self.ActionInTarget("redo")
 endfunction
 
-function! s:undotree.ActionGoPreviousState()
+function! s:undotree.ActionPreviousState()
     call self.ActionInTarget('earlier')
 endfunction
 
-function! s:undotree.ActionGoNextState()
+function! s:undotree.ActionNextState()
     call self.ActionInTarget('later')
 endfunction
 
-function! s:undotree.ActionGoPreviousSaved()
+function! s:undotree.ActionPreviousSavedState()
     call self.ActionInTarget('earlier 1f')
 endfunction
 
-function! s:undotree.ActionGoNextSaved()
+function! s:undotree.ActionNextSavedState()
     call self.ActionInTarget('later 1f')
 endfunction
 
