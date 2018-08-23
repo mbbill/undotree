@@ -168,7 +168,7 @@ function! s:getUniqueID()
     return s:cntr
 endfunction
 
-" Debug...
+" Set to 1 to enable debug log
 let s:debug = 0
 let s:debugfile = $HOME.'/undotree_debug.log'
 " If debug file exists, enable debug output.
@@ -307,12 +307,12 @@ endfunction
 
 function! s:undotree.Action(action)
     call s:log("undotree.Action() ".a:action)
-    if !self.IsVisible() || bufname("%") != self.bufname
-        echoerr "Fatal: window does not exists."
+    if !self.IsVisible() || !exists('b:isUndotreeBuffer')
+        echoerr "Fatal: window does not exist."
         return
     endif
     if !has_key(self,'Action'.a:action)
-        echoerr "Fatal: Action does not exists!"
+        echoerr "Fatal: Action does not exist!"
         return
     endif
     silent exec 'call self.Action'.a:action.'()'
@@ -499,6 +499,11 @@ function! s:undotree.Show()
     endif
     call s:exec("silent keepalt ".cmd)
     call self.SetFocus()
+
+    " We need a way to tell if the buffer is belong to undotree,
+    " bufname() is not always reliable.
+    let b:isUndotreeBuffer = 1
+
     setlocal winfixwidth
     setlocal noswapfile
     setlocal buftype=nowrite
@@ -538,8 +543,7 @@ function! s:undotree.Update()
         return
     endif
     " do nothing if we're in the undotree or diff panel
-    let bufname = bufname('%')
-    if bufname == self.bufname || bufname == t:diffpanel.bufname
+    if exists('b:isUndotreeBuffer')
         return
     endif
     if (&bt != '' && &bt != 'acwrite') || (&modifiable == 0) || (mode() != 'n')
@@ -1171,6 +1175,8 @@ function! s:diffpanel.Show()
         let cmd = 'botright '.g:undotree_DiffpanelHeight.'new '.self.bufname
     endif
     call s:exec_silent(cmd)
+
+    let b:isUndotreeBuffer = 1
 
     setlocal winfixwidth
     setlocal winfixheight
