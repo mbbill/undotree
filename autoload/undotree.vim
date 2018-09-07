@@ -94,6 +94,25 @@ let s:keymap += [['Undo','u','Undo']]
 let s:keymap += [['Enter','<2-LeftMouse>','Move to the current state']]
 let s:keymap += [['Enter','<cr>','Move to the current state']]
 
+" 'Diff' sign definitions. There are two 'delete' signs; a 'normal' one and one
+" that is used if the very end of the buffer has been deleted (in which case the
+" deleted text is actually bejond the end of the current buffer version and therefore
+" it is not possible to place a sign on the exact line - because it doesn't exist.
+" Instead, a 'special' delete sign is placed on the (existing) last line of the
+" buffer)
+exe 'sign define UndotreeAdd text=++ texthl='.undotree_HighlightSyntaxAdd
+exe 'sign define UndotreeChg text=~~ texthl='.undotree_HighlightSyntaxChange
+exe 'sign define UndotreeDel text=-- texthl='.undotree_HighlightSyntaxDel
+exe 'sign define UndotreeDelEnd text=-v texthl='.undotree_HighlightSyntaxDel
+
+" Id to use for all signs. This is an arbirary number that is hoped to be unique
+" within the instance of vim. There is no way of guaranteeing it IS unique, which
+" is a shame because it needs to be!
+"
+" Note that all signs are placed with the same Id - as long as we keep a count of
+" how many we have placed (so we can remove them all again), this is ok
+let s:signId = 2123654789
+
 "=================================================
 function! s:new(obj)
     let newobj = deepcopy(a:obj)
@@ -1060,7 +1079,7 @@ function! s:diffpanel.Update(seq,targetBufnr,targetid)
         endif
     endif
 
-    call self.ParseDiff(diffresult)
+    call self.ParseDiff(diffresult, a:targetBufnr)
 
     call self.SetFocus()
 
@@ -1079,13 +1098,24 @@ function! s:diffpanel.Update(seq,targetBufnr,targetid)
     call t:undotree.SetFocus()
 endfunction
 
-function! s:diffpanel.ParseDiff(diffresult)
+function! s:diffpanel.ParseDiff(diffresult, targetBufnr)
     " set target focus first.
     call t:undotree.SetTargetFocus()
+
+    " If 'a:diffresult' is empty then there are no new signs to place. However,
+    " we need to ensure any old signs are removed. This is especially important
+    " if we are at the very first sequence, otherwise signs get left
+    if (exists("w:undotree_diffsigns"))
+        while w:undotree_diffsigns > 0
+            exe 'sign unplace '.s:signId
+            let w:undotree_diffsigns -= 1
+        endwhile
+    endif
 
     if empty(a:diffresult)
         return
     endif
+
     " clear previous highlighted syntax
     " matchadd associates with windows.
     if exists("w:undotree_diffmatches")
@@ -1093,22 +1123,41 @@ function! s:diffpanel.ParseDiff(diffresult)
             call matchdelete(i)
         endfor
     endif
+
     let w:undotree_diffmatches = []
+    let w:undotree_diffsigns = 0
     let lineNr = 0
+    let l:lastLine = line('$')
     for line in a:diffresult
-        let matchnum = matchstr(line,'^[0-9,\,]*[ac]\zs\d*\ze')
+        let matchnum = matchstr(line,'^[0-9,\,]*[acd]\zs\d*\ze')
         if !empty(matchnum)
             let lineNr = str2nr(matchnum)
-            let matchwhat = matchstr(line,'^[0-9,\,]*\zs[ac]\ze\d*')
+            let matchwhat = matchstr(line,'^[0-9,\,]*\zs[acd]\ze\d*')
+            if matchwhat ==# 'd'
+                if g:undotree_HighlightChangedWithSign
+                    " Normally, for a 'delete' change, the line number we have is always 1 less than the line we
+                    " need to place the sign at, hence '+ 1'
+                    " However, if the very end of the buffer has been deleted then this is not possible (because
+                    " that bit of the buffer no longer exists), so we place a 'special' version of the 'delete'
+                    " sign on what is the last available line)
+                    exe 'sign place '.s:signId.' line='.((lineNr < l:lastLine) ? lineNr + 1 : l:lastLine).' name='.((lineNr < l:lastLine) ? 'UndotreeDel' : 'UndotreeDelEnd').' buffer='.a:targetBufnr
+                    let w:undotree_diffsigns += 1
+                endif
+
+                let matchnum = 0
+                let matchwhat = ''
+            endif
             continue
         endif
         if matchstr(line,'^<.*$') != ''
             let self.changes.del += 1
         endif
+
         let matchtext = matchstr(line,'^>\zs .*$')
         if empty(matchtext)
             continue
         endif
+
         let self.changes.add += 1
         if g:undotree_HighlightChangedText
             if matchtext != ' '
@@ -1116,6 +1165,11 @@ function! s:diffpanel.ParseDiff(diffresult)
                 call s:log("matchadd(".matchwhat.") ->  ".matchtext)
                 call add(w:undotree_diffmatches,matchadd((matchwhat ==# 'a' ? g:undotree_HighlightSyntaxAdd : g:undotree_HighlightSyntaxChange),matchtext))
             endif
+        endif
+
+        if g:undotree_HighlightChangedWithSign
+            exe 'sign place '.s:signId.' line='.lineNr.' name='.(matchwhat ==# 'a' ? 'UndotreeAdd' : 'UndotreeChg').' buffer='.a:targetBufnr
+            let w:undotree_diffsigns += 1
         endif
 
         let lineNr = lineNr+1
@@ -1232,6 +1286,13 @@ function! s:diffpanel.CleanUpHighlight()
         endif
     endfor
 
+    if (exists("w:undotree_diffsigns"))
+        while w:undotree_diffsigns > 0
+            exe 'sign unplace '.s:signId
+            let w:undotree_diffsigns -= 1
+        endwhile
+    endif
+
     "restore position
     call s:exec_silent("norm! ".curwinnr."\<c-w>\<c-w>")
     call winrestview(savedview)
@@ -1330,3 +1391,4 @@ function! undotree#UndotreeFocus()
         call t:undotree.SetFocus()
     endif
 endfunction
+

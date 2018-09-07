@@ -128,6 +128,11 @@ if !exists('g:undotree_HighlightChangedText')
     let g:undotree_HighlightChangedText = 1
 endif
 
+" Highlight changed text using signs in the gutter
+if !exists('g:undotree_HighlightChangedWithSign')
+    let g:undotree_HighlightChangedWithSign = 1
+endif
+
 " Highlight linked syntax type.
 " You may chose your favorite through ":hi" command
 if !exists('g:undotree_HighlightSyntaxAdd')
@@ -135,6 +140,9 @@ if !exists('g:undotree_HighlightSyntaxAdd')
 endif
 if !exists('g:undotree_HighlightSyntaxChange')
     let g:undotree_HighlightSyntaxChange = "DiffChange"
+endif
+if !exists('g:undotree_HighlightSyntaxDel')
+    let g:undotree_HighlightSyntaxDel = "DiffDelete"
 endif
 
 " Deprecates the old style configuration.
