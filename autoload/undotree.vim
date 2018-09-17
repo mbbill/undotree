@@ -1284,14 +1284,13 @@ function! s:diffpanel.CleanUpHighlight()
             endfor
             let w:undotree_diffmatches = []
         endif
+        if (exists("w:undotree_diffsigns"))
+            while w:undotree_diffsigns > 0
+                exe 'sign unplace '.s:signId
+                let w:undotree_diffsigns -= 1
+            endwhile
+        endif
     endfor
-
-    if (exists("w:undotree_diffsigns"))
-        while w:undotree_diffsigns > 0
-            exe 'sign unplace '.s:signId
-            let w:undotree_diffsigns -= 1
-        endwhile
-    endif
 
     "restore position
     call s:exec_silent("norm! ".curwinnr."\<c-w>\<c-w>")
