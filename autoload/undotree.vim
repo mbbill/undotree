@@ -1353,18 +1353,24 @@ function! undotree#UndotreeUpdate()
 endfunction
 
 function! undotree#UndotreeToggle()
-    call s:log(">>> UndotreeToggle()")
-    if !exists('w:undotree_id')
-        let w:undotree_id = 'id_'.s:getUniqueID()
-        call s:log("Unique window id assigned: ".w:undotree_id)
-    endif
+    try
+        call s:log(">>> UndotreeToggle()")
+        if !exists('w:undotree_id')
+            let w:undotree_id = 'id_'.s:getUniqueID()
+            call s:log("Unique window id assigned: ".w:undotree_id)
+        endif
 
-    if !exists('t:undotree')
-        let t:undotree = s:new(s:undotree)
-        let t:diffpanel = s:new(s:diffpanel)
-    endif
-    call t:undotree.Toggle()
-    call s:log("<<< UndotreeToggle() leave")
+        if !exists('t:undotree')
+            let t:undotree = s:new(s:undotree)
+            let t:diffpanel = s:new(s:diffpanel)
+        endif
+        call t:undotree.Toggle()
+        call s:log("<<< UndotreeToggle() leave")
+    catch /^Vim\%((\a\+)\)\?:E11/
+        echohl ErrorMsg
+        echo v:exception
+        echohl NONE
+    endtry
 endfunction
 
 function! undotree#UndotreeIsVisible()
@@ -1373,21 +1379,39 @@ endfunction
 
 function! undotree#UndotreeHide()
     if undotree#UndotreeIsVisible()
-        call undotree#UndotreeToggle()
+        try
+            call undotree#UndotreeToggle()
+        catch /^Vim\%((\a\+)\)\?:E11/
+            echohl ErrorMsg
+            echo v:exception
+            echohl NONE
+        endtry
     endif
 endfunction
 
 function! undotree#UndotreeShow()
-    if ! undotree#UndotreeIsVisible()
-        call undotree#UndotreeToggle()
-    else
-        call t:undotree.SetFocus()
-    endif
+    try
+        if ! undotree#UndotreeIsVisible()
+            call undotree#UndotreeToggle()
+        else
+            call t:undotree.SetFocus()
+        endif
+    catch /^Vim\%((\a\+)\)\?:E11/
+        echohl ErrorMsg
+        echo v:exception
+        echohl NONE
+    endtry
 endfunction
 
 function! undotree#UndotreeFocus()
     if undotree#UndotreeIsVisible()
-        call t:undotree.SetFocus()
+        try
+            call t:undotree.SetFocus()
+        catch /^Vim\%((\a\+)\)\?:E11/
+            echohl ErrorMsg
+            echo v:exception
+            echohl NONE
+        endtry
     endif
 endfunction
 
