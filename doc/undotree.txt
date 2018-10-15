@@ -317,16 +317,16 @@ Default: "DiffAdd" and "DiffChange"
 There are two ways of changing the default key mappings:
 The first way is to define global mappings as the following example:
 >
-    nmap <buffer> J <plug>UndotreeGoNextState
-    nmap <buffer> K <plug>UndotreeGoPreviousState
+    nmap <buffer> J <plug>UndotreeNextState
+    nmap <buffer> K <plug>UndotreePreviousState
 <
 A better approach is to define the callback function g:Undotree_CustomMap().
 The function will be called after the undotree windows is initialized, so the
 key mappings only works on the undotree windows.
 >
     function g:Undotree_CustomMap()
-        nmap <buffer> J <plug>UndotreeGoNextState
-        nmap <buffer> K <plug>UndotreeGoPreviousState
+        nmap <buffer> J <plug>UndotreeNextState
+        nmap <buffer> K <plug>UndotreePreviousState
     endfunc
 <
 List of the commands available for redefinition.
@@ -337,10 +337,10 @@ List of the commands available for redefinition.
     <plug>UndotreeClearHistory
     <plug>UndotreeTimestampToggle
     <plug>UndotreeDiffToggle
-    <plug>UndotreeGoNextState
-    <plug>UndotreeGoPreviousState
-    <plug>UndotreeGoNextSaved
-    <plug>UndotreeGoPreviousSaved
+    <plug>UndotreeNextState
+    <plug>UndotreePreviousState
+    <plug>UndotreeNextSavedState
+    <plug>UndotreePreviousSavedState
     <plug>UndotreeRedo
     <plug>UndotreeUndo
     <plug>UndotreeEnter
