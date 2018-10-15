@@ -114,14 +114,14 @@ exe 'sign define UndotreeDelEnd text=-v texthl='.undotree_HighlightSyntaxDel
 let s:signId = 2123654789
 
 "=================================================
-function! s:new(obj)
+function! s:new(obj) abort
     let newobj = deepcopy(a:obj)
     call newobj.Init()
     return newobj
 endfunction
 
 " Get formatted time
-function! s:gettime(time)
+function! s:gettime(time) abort
     if a:time == 0
         return s:timeOriginal
     endif
@@ -166,13 +166,13 @@ function! s:gettime(time)
     endif
 endfunction
 
-function! s:exec(cmd)
+function! s:exec(cmd) abort
     call s:log("s:exec() ".a:cmd)
     silent exe a:cmd
 endfunction
 
 " Don't trigger any events(like BufEnter which could cause redundant refresh)
-function! s:exec_silent(cmd)
+function! s:exec_silent(cmd) abort
     call s:log("s:exec_silent() ".a:cmd)
     let ei_bak= &eventignore
     set eventignore=BufEnter,BufLeave,BufWinLeave,InsertLeave,CursorMoved,BufWritePost
@@ -182,7 +182,7 @@ endfunction
 
 " Return a unique id each time.
 let s:cntr = 0
-function! s:getUniqueID()
+function! s:getUniqueID() abort
     let s:cntr = s:cntr + 1
     return s:cntr
 endfunction
@@ -198,7 +198,7 @@ if filewritable(s:debugfile)
     redir END
 endif
 
-function! s:log(msg)
+function! s:log(msg) abort
     if s:debug
         exec 'redir >> ' . s:debugfile
         silent echon strftime('%H:%M:%S') . ': ' . string(a:msg) . "\n"
@@ -210,11 +210,11 @@ endfunction
 "Base class for panels.
 let s:panel = {}
 
-function! s:panel.Init()
+function! s:panel.Init() abort
     let self.bufname = "invalid"
 endfunction
 
-function! s:panel.SetFocus()
+function! s:panel.SetFocus() abort
     let winnr = bufwinnr(self.bufname)
     " already focused.
     if winnr == winnr()
@@ -229,7 +229,7 @@ function! s:panel.SetFocus()
     call s:exec_silent("norm! ".winnr."\<c-w>\<c-w>")
 endfunction
 
-function! s:panel.IsVisible()
+function! s:panel.IsVisible() abort
     if bufwinnr(self.bufname) != -1
         return 1
     else
@@ -237,7 +237,7 @@ function! s:panel.IsVisible()
     endif
 endfunction
 
-function! s:panel.Hide()
+function! s:panel.Hide() abort
     call s:log(self.bufname." Hide()")
     if !self.IsVisible()
         return
@@ -265,7 +265,7 @@ endfunction
 
 let s:undotree = s:new(s:panel)
 
-function! s:undotree.Init()
+function! s:undotree.Init() abort
     let self.bufname = "undotree_".s:getUniqueID()
     " Increase to make it unique.
     let self.width = g:undotree_SplitWidth
@@ -295,7 +295,7 @@ function! s:undotree.Init()
     let self.showHelp = 0
 endfunction
 
-function! s:undotree.BindKey()
+function! s:undotree.BindKey() abort
     if v:version > 703 || (v:version == 703 && has("patch1261"))
         let map_options = ' <nowait> '
     else
@@ -312,7 +312,7 @@ function! s:undotree.BindKey()
     endif
 endfunction
 
-function! s:undotree.BindAu()
+function! s:undotree.BindAu() abort
     " Auto exit if it's the last window
     augroup Undotree_Main
         au!
@@ -324,7 +324,7 @@ function! s:undotree.BindAu()
     augroup end
 endfunction
 
-function! s:undotree.Action(action)
+function! s:undotree.Action(action) abort
     call s:log("undotree.Action() ".a:action)
     if !self.IsVisible() || !exists('b:isUndotreeBuffer')
         echoerr "Fatal: window does not exist."
@@ -338,7 +338,7 @@ function! s:undotree.Action(action)
 endfunction
 
 " Helper function, do action in target window, and then update itself.
-function! s:undotree.ActionInTarget(cmd)
+function! s:undotree.ActionInTarget(cmd) abort
     if !self.SetTargetFocus()
         return
     endif
@@ -351,17 +351,17 @@ function! s:undotree.ActionInTarget(cmd)
     call self.SetFocus()
 endfunction
 
-function! s:undotree.ActionHelp()
+function! s:undotree.ActionHelp() abort
     let self.showHelp = !self.showHelp
     call self.Draw()
     call self.MarkSeqs()
 endfunction
 
-function! s:undotree.ActionFocusTarget()
+function! s:undotree.ActionFocusTarget() abort
     call self.SetTargetFocus()
 endfunction
 
-function! s:undotree.ActionEnter()
+function! s:undotree.ActionEnter() abort
     let index = self.Screen2Index(line('.'))
     if index < 0
         return
@@ -377,37 +377,37 @@ function! s:undotree.ActionEnter()
     call self.ActionInTarget('u '.self.asciimeta[index].seq)
 endfunction
 
-function! s:undotree.ActionUndo()
+function! s:undotree.ActionUndo() abort
     call self.ActionInTarget('undo')
 endfunction
 
-function! s:undotree.ActionRedo()
+function! s:undotree.ActionRedo() abort
     call self.ActionInTarget("redo")
 endfunction
 
-function! s:undotree.ActionPreviousState()
+function! s:undotree.ActionPreviousState() abort
     call self.ActionInTarget('earlier')
 endfunction
 
-function! s:undotree.ActionNextState()
+function! s:undotree.ActionNextState() abort
     call self.ActionInTarget('later')
 endfunction
 
-function! s:undotree.ActionPreviousSavedState()
+function! s:undotree.ActionPreviousSavedState() abort
     call self.ActionInTarget('earlier 1f')
 endfunction
 
-function! s:undotree.ActionNextSavedState()
+function! s:undotree.ActionNextSavedState() abort
     call self.ActionInTarget('later 1f')
 endfunction
 
-function! s:undotree.ActionDiffToggle()
+function! s:undotree.ActionDiffToggle() abort
     let self.opendiff = !self.opendiff
     call t:diffpanel.Toggle()
     call self.UpdateDiff()
 endfunction
 
-function! s:undotree.ActionTimestampToggle()
+function! s:undotree.ActionTimestampToggle() abort
     if !self.SetTargetFocus()
         return
     endif
@@ -418,7 +418,7 @@ function! s:undotree.ActionTimestampToggle()
     call self.SetFocus()
 endfunction
 
-function! s:undotree.ActionClearHistory()
+function! s:undotree.ActionClearHistory() abort
     if input("Clear ALL undo history? Type \"YES\" to continue: ") != "YES"
         return
     endif
@@ -434,11 +434,11 @@ function! s:undotree.ActionClearHistory()
     call self.Update()
 endfunction
 
-function! s:undotree.ActionClose()
+function! s:undotree.ActionClose() abort
     call self.Toggle()
 endfunction
 
-function! s:undotree.UpdateDiff()
+function! s:undotree.UpdateDiff() abort
     call s:log("undotree.UpdateDiff()")
     if !t:diffpanel.IsVisible()
         return
@@ -447,7 +447,7 @@ function! s:undotree.UpdateDiff()
 endfunction
 
 " May fail due to target window closed.
-function! s:undotree.SetTargetFocus()
+function! s:undotree.SetTargetFocus() abort
     for winnr in range(1, winnr('$')) "winnr starts from 1
         if getwinvar(winnr,'undotree_id') == self.targetid
             if winnr() != winnr
@@ -459,7 +459,7 @@ function! s:undotree.SetTargetFocus()
     return 0
 endfunction
 
-function! s:undotree.Toggle()
+function! s:undotree.Toggle() abort
     "Global auto commands to keep undotree up to date.
     let auEvents = "BufEnter,InsertLeave,CursorMoved,BufWritePost"
 
@@ -483,7 +483,7 @@ function! s:undotree.Toggle()
     endif
 endfunction
 
-function! s:undotree.GetStatusLine()
+function! s:undotree.GetStatusLine() abort
     if self.seq_cur != -1
         let seq_cur = self.seq_cur
     else
@@ -497,7 +497,7 @@ function! s:undotree.GetStatusLine()
     return 'current: '.seq_cur.' redo: '.seq_curhead
 endfunction
 
-function! s:undotree.Show()
+function! s:undotree.Show() abort
     call s:log("undotree.Show()")
     if self.IsVisible()
         return
@@ -557,7 +557,7 @@ function! s:undotree.Show()
 endfunction
 
 " called outside undotree window
-function! s:undotree.Update()
+function! s:undotree.Update() abort
     if !self.IsVisible()
         return
     endif
@@ -626,7 +626,7 @@ function! s:undotree.Update()
     call self.UpdateDiff()
 endfunction
 
-function! s:undotree.AppendHelp()
+function! s:undotree.AppendHelp() abort
     if self.showHelp
         call append(0,'') "empty line
         for i in s:keymap
@@ -641,7 +641,7 @@ function! s:undotree.AppendHelp()
     endif
 endfunction
 
-function! s:undotree.Index2Screen(index)
+function! s:undotree.Index2Screen(index) abort
     " index starts from zero
     let index_padding = 1
     let empty_line = 1
@@ -660,7 +660,7 @@ function! s:undotree.Index2Screen(index)
 endfunction
 
 " <0 if index is invalid. e.g. current line is in help text.
-function! s:undotree.Screen2Index(line)
+function! s:undotree.Screen2Index(line) abort
     let index_padding = 1
     let empty_line = 1
     let index = a:line - index_padding - empty_line
@@ -677,7 +677,7 @@ function! s:undotree.Screen2Index(line)
 endfunction
 
 " Current window must be undotree.
-function! s:undotree.Draw()
+function! s:undotree.Draw() abort
     " remember the current cursor position.
     let savedview = winsaveview()
 
@@ -697,7 +697,7 @@ function! s:undotree.Draw()
     setlocal nomodifiable
 endfunction
 
-function! s:undotree.MarkSeqs()
+function! s:undotree.MarkSeqs() abort
     call s:log("bak(cur,curhead,newhead): ".
                 \self.seq_cur_bak.' '.
                 \self.seq_curhead_bak.' '.
@@ -759,13 +759,13 @@ endfunction
 " tree node class
 let s:node = {}
 
-function! s:node.Init()
+function! s:node.Init() abort
     let self.seq = -1
     let self.p = []
     let self.time = -1
 endfunction
 
-function! s:undotree._parseNode(in,out)
+function! s:undotree._parseNode(in,out) abort
     " type(in) == type([]) && type(out) == type({})
     if empty(a:in) "empty
         return
@@ -797,7 +797,7 @@ endfunction
 "let s:test={'seq_last': 4, 'entries': [{'seq': 3, 'alt': [{'seq': 1, 'time': 1345131443}, {'seq': 2, 'time': 1345131445}], 'time': 1345131490}, {'seq': 4, 'time': 1345131492, 'newhead': 1}], 'time_cur': 1345131493, 'save_last': 0, 'synced': 0, 'save_cur': 0, 'seq_cur': 4}
 
 " updatetree: 0: no update, just assign seqs;  1: update and assign seqs.
-function! s:undotree.ConvertInput(updatetree)
+function! s:undotree.ConvertInput(updatetree) abort
     "reset seqs
     let self.seq_cur_bak = self.seq_cur
     let self.seq_curhead_bak = self.seq_curhead
@@ -866,7 +866,7 @@ endfunction
 "let example = {'seq':0,'p':[{'seq':1,'p':[{'seq':2,'p':[{'seq':6,'p':[]},{'seq':8,'p':[]}]}]},{'seq':3,'p':[{'seq':4,'p':[{'seq':7,'p':[]}]}]},{'seq':5,'p':[]}]}
 "
 " Convert self.tree -> self.asciitree
-function! s:undotree.Render()
+function! s:undotree.Render() abort
     " We gonna modify self.tree so we'd better make a copy first.
     " Cannot make a copy because variable nested too deep, gosh.. okay,
     " fine..
@@ -1014,7 +1014,7 @@ endfunction
 "diff panel
 let s:diffpanel = s:new(s:panel)
 
-function! s:diffpanel.Update(seq,targetBufnr,targetid)
+function! s:diffpanel.Update(seq,targetBufnr,targetid) abort
     call s:log('diffpanel.Update(),seq:'.a:seq.' bufname:'.bufname(a:targetBufnr))
     if !self.diffexecutable
         return
@@ -1098,7 +1098,7 @@ function! s:diffpanel.Update(seq,targetBufnr,targetid)
     call t:undotree.SetFocus()
 endfunction
 
-function! s:diffpanel.ParseDiff(diffresult, targetBufnr)
+function! s:diffpanel.ParseDiff(diffresult, targetBufnr) abort
     " set target focus first.
     call t:undotree.SetTargetFocus()
 
@@ -1176,7 +1176,7 @@ function! s:diffpanel.ParseDiff(diffresult, targetBufnr)
     endfor
 endfunction
 
-function! s:diffpanel.GetStatusLine()
+function! s:diffpanel.GetStatusLine() abort
     let max = winwidth(0) - 4
     let sum = self.changes.add + self.changes.del
     if sum > max
@@ -1189,7 +1189,7 @@ function! s:diffpanel.GetStatusLine()
     return string(sum).' '.repeat('+',add).repeat('-',del)
 endfunction
 
-function! s:diffpanel.Init()
+function! s:diffpanel.Init() abort
     let self.bufname = "diffpanel_".s:getUniqueID()
     let self.cache = {}
     let self.changes = {'add':0, 'del':0}
@@ -1199,7 +1199,7 @@ function! s:diffpanel.Init()
     endif
 endfunction
 
-function! s:diffpanel.Toggle()
+function! s:diffpanel.Toggle() abort
     call s:log(self.bufname." Toggle()")
     if self.IsVisible()
         call self.Hide()
@@ -1208,7 +1208,7 @@ function! s:diffpanel.Toggle()
     endif
 endfunction
 
-function! s:diffpanel.Show()
+function! s:diffpanel.Show() abort
     call s:log("diffpanel.Show()")
     if self.IsVisible()
         return
@@ -1258,7 +1258,7 @@ function! s:diffpanel.Show()
     call winrestview(savedview)
 endfunction
 
-function! s:diffpanel.BindAu()
+function! s:diffpanel.BindAu() abort
     " Auto exit if it's the last window or undotree closed.
     augroup Undotree_Diff
         au!
@@ -1268,7 +1268,7 @@ function! s:diffpanel.BindAu()
     augroup end
 endfunction
 
-function! s:diffpanel.CleanUpHighlight()
+function! s:diffpanel.CleanUpHighlight() abort
     call s:log("CleanUpHighlight()")
     " save current position
     let curwinnr = winnr()
@@ -1297,7 +1297,7 @@ function! s:diffpanel.CleanUpHighlight()
     call winrestview(savedview)
 endfunction
 
-function! s:diffpanel.Hide()
+function! s:diffpanel.Hide() abort
     call s:log(self.bufname." Hide()")
     if !self.IsVisible()
         return
@@ -1309,7 +1309,7 @@ endfunction
 
 "=================================================
 " It will set the target of undotree window to the current editing buffer.
-function! s:undotreeAction(action)
+function! s:undotreeAction(action) abort
     call s:log("undotreeAction()")
     if !exists('t:undotree')
         echoerr "Fatal: t:undotree does not exist!"
@@ -1318,7 +1318,7 @@ function! s:undotreeAction(action)
     call t:undotree.Action(a:action)
 endfunction
 
-function! s:exitIfLast()
+function! s:exitIfLast() abort
     let num = 0
     if t:undotree.IsVisible()
         let num = num + 1
@@ -1335,7 +1335,7 @@ endfunction
 "=================================================
 " User command functions
 "called outside undotree window
-function! undotree#UndotreeUpdate()
+function! undotree#UndotreeUpdate() abort
     if !exists('t:undotree')
         return
     endif
@@ -1352,14 +1352,13 @@ function! undotree#UndotreeUpdate()
     endif
 endfunction
 
-function! undotree#UndotreeToggle()
+function! undotree#UndotreeToggle() abort
     try
         call s:log(">>> UndotreeToggle()")
         if !exists('w:undotree_id')
             let w:undotree_id = 'id_'.s:getUniqueID()
             call s:log("Unique window id assigned: ".w:undotree_id)
         endif
-
         if !exists('t:undotree')
             let t:undotree = s:new(s:undotree)
             let t:diffpanel = s:new(s:diffpanel)
@@ -1373,11 +1372,11 @@ function! undotree#UndotreeToggle()
     endtry
 endfunction
 
-function! undotree#UndotreeIsVisible()
+function! undotree#UndotreeIsVisible() abort
     return (exists('t:undotree') && t:undotree.IsVisible())
 endfunction
 
-function! undotree#UndotreeHide()
+function! undotree#UndotreeHide() abort
     if undotree#UndotreeIsVisible()
         try
             call undotree#UndotreeToggle()
@@ -1389,7 +1388,7 @@ function! undotree#UndotreeHide()
     endif
 endfunction
 
-function! undotree#UndotreeShow()
+function! undotree#UndotreeShow() abort
     try
         if ! undotree#UndotreeIsVisible()
             call undotree#UndotreeToggle()
@@ -1403,7 +1402,7 @@ function! undotree#UndotreeShow()
     endtry
 endfunction
 
-function! undotree#UndotreeFocus()
+function! undotree#UndotreeFocus() abort
     if undotree#UndotreeIsVisible()
         try
             call t:undotree.SetFocus()
