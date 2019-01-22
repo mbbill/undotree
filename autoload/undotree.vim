@@ -1320,15 +1320,19 @@ endfunction
 
 function! s:exitIfLast() abort
     let num = 0
-    if t:undotree.IsVisible()
+    if exists('t:undotree') && t:undotree.IsVisible()
         let num = num + 1
     endif
-    if t:diffpanel.IsVisible()
+    if exists('t:diffpanel') && t:diffpanel.IsVisible()
         let num = num + 1
     endif
     if winnr('$') == num
-        call t:undotree.Hide()
-        call t:diffpanel.Hide()
+        if exists('t:undotree')
+            call t:undotree.Hide()
+        endif
+        if exists('t:diffpanel')
+            call t:diffpanel.Hide()
+        endif
     endif
 endfunction
 
