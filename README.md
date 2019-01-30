@@ -6,8 +6,13 @@
 ![](https://sites.google.com/site/mbbill/undotree_new.png)
 
 ### Description
-Vim 7.0 added a new feature named **Undo branches**. Basically it's a kind of ability to go back to the text after any change, even if they were undone. Vim stores undo history in a tree which you can browse and manipulate through a bunch of commands. But that was not enough straightforward and a bit hard to use. You may use `:help new-undo-branches` or `:help undo-tree` to get more detailed help.
-Now this plug-in will free you from those commands and bring back the power of undo tree.
+The plug-in visualize undo history and makes it easier to browse and switch between different undo branches. Wait a second, what do you mean by undo "branches"? Well, it's vim feature added a long time ago, and it allows you to go back to a state when it is overwritten by a latest edit. For example, you made a change A, then B, then go back to A and made change C, normally you won't be able to go back to B anymore on other editors. Vim internally maintains all the undo history as a tree structure, and this plug in exposes the tree to you so that you can switch to whatever state you need.
+
+
+Some people have questions about file contents being changed when switching between undo history states. Don't worry, *undotree* will **NEVER** save your data or write to disk. All it does is to change the current buffer little bit, just like those auto-completion plug-ins does - it adds or removes something in the buffer temporarily, and if you don't like you can always go back to the last state easily. Let's say, you made some change but didn't save, now you use *undotree* and go back to an old version, your last change doesn't get lost - it stores in the latest undo history node. Clicking that node will bring you back instantly. Then you might ask what if I made some change without save and switch back to an old version and then **exit**? Well, imaging what would happen if you don't have *undotree*? You lost your latest edit and the file on disk is your last saved version. This behaviour remains the same with *undotree*, and that's why I highly recommend enabling *persistent undo*. Let me explain how persistent undo works: the biggest difference is that persistent undo keeps your undo history on disk, kind of like git. Let's say you made a change A, then B, then go back to A and made change C, and now you *save* the file. Now Vim save the file with content state C, and in the mean time it saves undo history to a file with A, B and C. Next time you open the file you can still go back to B because when you save, you save **everything** you did in the past. So, be careful don't let somebody else find our your secret - you know I'm kidding.
+
+
+Undotree is written in **pure Vim script** and doesn't rely on any third party tools. It's lightweight, simple and fast. It only does what it supposed to do, and it only runs when you need it.
 
 ### Features
  1. Visualize undo-tree
@@ -44,7 +49,7 @@ Now this plug-in will free you from those commands and bring back the power of u
 // In your vimrc
 
     if has("persistent_undo")
-        set undodir=~/.undodir/
+        set undodir=$HOME."/.undodir"
         set undofile
     endif
 
@@ -62,16 +67,6 @@ https://github.com/mbbill/undotree/issues
  1. Run vim, and the log will automatically be appended to the file, and you may watch it using `tail`:
     * `$tail -F ~/undotree_debug.log`
  1. If you want to disable debug, just delete that file.
-
-### Alternatives
-Someone asked me about the difference with [Gundo](https://bitbucket.org/sjl/gundo.vim/), here is a list of differences, or advantages.
- 1. Pure vimscript implementation and no 3rd-party libraries(like python) is needed, don't worry about performance, it's not such a big deal for vim to handle this. The only dependency is the 'diff' tool which always shipped with vim and even without 'diff' you still can use most of the features of this script.
- 1. Realtime updated undo tree. Once you make changes, the undo tree will be updated simultaneously.
- 1. Several useful marks, like current changeset, next redo changeset, saved changeset, etc.
- 1. Toggle between relative timestamp and absolute timestamp.
- 1. Realtime updated undo window.
- 1. Ability to clear undo history.
- 1. More customizable.
 
 ### License
 **BSD**
