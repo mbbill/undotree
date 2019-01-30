@@ -1,9 +1,8 @@
-*undotree.txt*  Display your undo history in a graph
+*undotree.txt*  The undo history visualizer for VIM
 
 Author:         Ming Bai <mbbill AT gmail DOT COM>
 Licence:        BSD
 Homepage:       https://github.com/mbbill/undotree/
-Version:        4.3
 
 ==============================================================================
 CONTENTS                                                   *undotree-contents*
@@ -34,13 +33,53 @@ CONTENTS                                                   *undotree-contents*
 ==============================================================================
 1. Intro                                                      *undotree-intro*
 
-Vim 7.0 added a new feature named Undo branches. Basically it's a kind of
-ability to go back to the text after any change, even if they were undone. Vim
-stores undo history in a tree which you can browse and manipulate through a
-bunch of commands. But that was not enough straightforward and a bit hard to
-use. You may use :help |new-undo-branches| or :help |undo-tree| to get more
-detailed help. Now this plug-in will free you from those commands and bring
-back the power of undo tree.
+The plug-in visualizes undo history and makes it easier to browse and switch
+between different undo branches. You might wonder what is undo "branches"?
+It's vim feature that allows you to go back to a state when it is overwritten
+by a latest edit. For most editors, if you make a change A, then B, then go
+back to A and make change C, normally you won't be able to go back to B
+because undo history is linear. That's not the case for Vim because it
+internally keeps all the edit history like a tree structure, and this plug-in
+exposes the tree to you so that you not only can switch back and forth but
+also can switch between branches.
+
+Some people have questions about file contents being changed when switching
+between undo history states. Don't worry, undotree will NEVER save your data
+or write to disk. All it does is to change the current buffer little bit, just
+like those auto-completion plug-ins do. It just adds or removes something in
+the buffer temporarily, and if you don't like you can always go back to the
+last state easily. Let's say, you made some change but didn't save, then you
+use undotree and go back to an arbitrary version, your unsaved change doesn't
+get lost - it stores in the latest undo history node. Clicking that node on
+undotree will bring you back instantly. Play with undo/redo on other editors
+is always dangerous because when you step back and accidentally typed
+something, boom! You lose your edits. But don't worry, that won't happen in
+Vim. Then you might ask what if I make some changes without saving and switch
+back to an old version and then exit? Well, imaging what would happen if you
+don't have undotree? You lose your latest edits and the file on disk is your
+last saved version. This behaviour remains the same with undotree. So, if you
+saved, you won't lose anything.
+
+We all know that usually undo/redo is only for the current edit session. It's
+stored in memory and once the process exits, the undo history is lost.
+Although undotree makes switching between history states easier, it doesn't do
+more than that. Sometimes it would be much safer or more convenient to keep
+the undo history across edit sessions. In this case you might need to enable a
+Vim feature called persistent undo. Let me explain how persistent undo works:
+instead of keeping undo history in RAM, persistent undo keeps undo history in
+file. Let's say you make a change A, then B, then go back to A and make change
+C, then you save the file. Now Vim save the file with content state C, and in
+the mean time it saves the entire undo history to a file including state A, B
+and C. Next time when you open the file, Vim will also restore undo history.
+So you can still go back to B. The history file is incremental, and every
+change will be recorded permanently, kind of like Git. You might think that's
+too much, well, undotree does provide a way to clean them up. If you need to
+enable persistent undo, type :h persistent-undo or follow the instructions
+below.
+
+Undotree is written in pure Vim script and doesn't rely on any third party
+tools. It's lightweight, simple and fast. It only does what it supposed to do,
+and it only runs when you need it.
 
 ==============================================================================
 2. Usage                                                      *undotree-usage*
@@ -51,26 +90,30 @@ for example.
 >
     nnoremap <F5> :UndotreeToggle<cr>
 <
-Then you can try to do some modification, and the undo tree will automatically
-updated afterwards.
+Markers
 
-There are some hotkeys provided by vim to switch between the changes in
-history, like |u|, |<c-r>|, |g+|, |g-| as well as the |:earlier| and |:later|
-commands.
+  * Every change has a sequence number and it is displayed before timestamps.
 
-You may also switch to undotree panel and use the hotkeys to switch between
-history versions. Press ? in undotree window for quick help of hotkeys.
+  * The current state is marked as > number <.
 
-You can monitor the changed text in diff panel which is automatically updated
-when undo/redo happens.
+  * The next state which will be restored by :redo or <ctrl-r> is marked as
+    { number }.
 
-Persistent undo.
-It is highly recommend to enable the persistent undo. If you don't like your
-working directory be messed up with the undo file everywhere, you may add the
-following line to your vimrc in order to make them stored together.
+  * The [ number ] marks the most recent change.
+
+  * The undo history is sorted by timestamps.
+
+  * Saved changes are marked as s and the big S indicates the most recent
+    saved change.
+
+  * Press ? in undotree window for quick help.
+
+Persistent undo
+
+Usually I would like to store the undo files in a seperate place like below.
 >
     if has("persistent_undo")
-        set undodir='~/.undodir/'
+        set undodir=$HOME."/.undodir"
         set undofile
     endif
 <
@@ -361,6 +404,9 @@ https://github.com/mbbill/undotree/issues
 
 ==============================================================================
 5. Changelog                                              *undotree-changelog*
+
+Further changes will not be recorded. Please go to github page for more
+information.
 
 4.4 (2017-10-15)
     - Autoload plugin functions
