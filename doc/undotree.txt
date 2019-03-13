@@ -387,7 +387,6 @@ List of the commands available for redefinition.
     <plug>UndotreeRedo
     <plug>UndotreeUndo
     <plug>UndotreeEnter
-    <plug>UndotreeEnter
 <
 
 ------------------------------------------------------------------------------
