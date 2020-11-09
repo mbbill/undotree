@@ -156,6 +156,11 @@ if !exists('g:undotree_HelpLine')
     let g:undotree_HelpLine = 1
 endif
 
+" Show cursorline
+if !exists('g:undotree_CursorLine')
+    let g:undotree_CursorLine = 1
+endif
+
 "=================================================
 " User commands.
 command! -n=0 -bar UndotreeToggle   :call undotree#UndotreeToggle()
