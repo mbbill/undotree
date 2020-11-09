@@ -533,7 +533,11 @@ function! s:undotree.Show() abort
     setlocal nospell
     setlocal nonumber
     setlocal norelativenumber
-    setlocal cursorline
+	if g:undotree_CursorLine
+		setlocal cursorline
+	else
+		setlocal nocursorline
+	endif
     setlocal nomodifiable
     setlocal statusline=%!t:undotree.GetStatusLine()
     setfiletype undotree
