@@ -23,7 +23,7 @@ Undotree is written in **pure Vim script** and doesn't rely on any third party t
 
 ### Download and Install
 
-Use whatever plug-in manager to pull the master branch.
+Use whatever plug-in manager to pull the master branch. I've included 2 examples of the most used:
 - *Vundle:* `:PluginInstall`
 - *Vim-Plug:* `PlugInstall`
 
