@@ -29,9 +29,9 @@ Use whatever plug-in manager to pull the master branch. I've included 2 examples
 
 ### Usage
  1. Use `:UndotreeToggle` to toggle the undo-tree panel. You may want to map this command to whatever hotkey by adding the following line to your vimrc, take `F5` for example.
-
-`nnoremap <F5> :UndotreeToggle<CR>`
- 
+```
+nnoremap <F5> :UndotreeToggle<CR>
+```
  1. Markers
     * Every change has a sequence number and it is displayed before timestamps.
     * The current state is marked as `> number <`.
