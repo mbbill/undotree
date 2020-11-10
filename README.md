@@ -24,8 +24,12 @@ Undotree is written in **pure Vim script** and doesn't rely on any third party t
 ### Download and Install
 
 Use whatever plug-in manager to pull the master branch. I've included 2 examples of the most used:
+- *Vundle:* `Plugin 'mbbill/undotree'`
+- *Vim-Plug:* `Plug 'mbbill/undotree'`
+
+And install them with the following:
 - *Vundle:* `:PluginInstall`
-- *Vim-Plug:* `PlugInstall`
+- *Vim-Plug:* `:PlugInstall`
 
 ### Usage
  1. Use `:UndotreeToggle` to toggle the undo-tree panel. You may want to map this command to whatever hotkey by adding the following line to your vimrc, take `F5` for example.
