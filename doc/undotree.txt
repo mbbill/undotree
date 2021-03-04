@@ -18,11 +18,12 @@ CONTENTS                                                   *undotree-contents*
         3.5  undotree_DiffAutoOpen .......... |undotree_DiffAutoOpen|
         3.6  undotree_SetFocusWhenToggle .... |undotree_SetFocusWhenToggle|
         3.7  undotree_TreeNodeShape ......... |undotree_TreeNodeShape|
-        3.8  undotree_DiffCommand ........... |undotree_DiffCommand|
-        3.9  undotree_RelativeTimestamp ..... |undotree_RelativeTimestamp|
-        3.10 undotree_ShortIndicators ....... |undotree_ShortIndicators|
-        3.11 undotree_HighlightChangedText .. |undotree_HighlightChangedText|
-        3.12 undotree_HighlightSyntaxAdd .... |undotree_HighlightSyntaxAdd|
+        3.8  undotree_TreeVertShape ......... |undotree_TreeNodeShape|
+        3.9  undotree_DiffCommand ........... |undotree_DiffCommand|
+        3.10  undotree_RelativeTimestamp ..... |undotree_RelativeTimestamp|
+        3.11 undotree_ShortIndicators ....... |undotree_ShortIndicators|
+        3.12 undotree_HighlightChangedText .. |undotree_HighlightChangedText|
+        3.13 undotree_HighlightSyntaxAdd .... |undotree_HighlightSyntaxAdd|
              undotree_HighlightSyntaxChange . |undotree_HighlightSyntaxChange|
         3.13 Undotree_CustomMap ............. |Undotree_CustomMap|
         3.14 undotree_HelpLine .............. |undotree_HelpLine|
