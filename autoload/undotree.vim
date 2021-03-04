@@ -950,7 +950,7 @@ function! s:undotree.Render() abort
                 if index == i
                     let newline = newline.g:undotree_TreeNodeShape.' '
                 else
-                    let newline = newline.'| '
+                    let newline = newline.g:undotree_TreeVertShape.' '
                 endif
             endfor
             let newline = newline.'   '.(node.seq).'    '.
@@ -971,10 +971,10 @@ function! s:undotree.Render() abort
             let newmeta = s:new(s:node) "invalid node.
             for k in range(len(slots))
                 if k < index
-                    let newline = newline."| "
+                    let newline = newline.g:undotree_TreeVertShape." "
                 endif
                 if k == index
-                    let newline = newline."|/ "
+                    let newline = newline.g:undotree_TreeVertShape."/ "
                 endif
                 if k > index
                     let newline = newline."/ "
