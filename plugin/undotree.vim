@@ -114,6 +114,11 @@ if !exists('g:undotree_TreeNodeShape')
     let g:undotree_TreeNodeShape = '*'
 endif
 
+" tree vertical shape.
+if !exists('g:undotree_TreeVertShape')
+    let g:undotree_TreeVertShape = '|'
+endif
+
 if !exists('g:undotree_DiffCommand')
     let g:undotree_DiffCommand = "diff"
 endif
