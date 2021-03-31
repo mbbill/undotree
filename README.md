@@ -57,7 +57,7 @@ if has("persistent_undo")
         call mkdir(target_path, "p", 0700)
     endif
 
-    let undodir=target_path
+    let &undodir=target_path
     set undofile
 endif
 ```
