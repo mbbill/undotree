@@ -23,6 +23,14 @@ Undotree is written in **pure Vim script** and doesn't rely on any third party t
 
 ### Download and Install
 
+Using Vim's built-in package manager:
+```
+mkdir -p ~/.vim/pack/mbbil/start
+cd ~/.vim/pack/mbbil/start
+git clone https://github.com/mbbill/undotree.git
+vim -u NONE -c "helptags undotree/doc" -c q
+```
+
 Use whatever plug-in manager to pull the master branch. I've included 2 examples of the most used:
 - *Vundle:* `Plugin 'mbbill/undotree'`
 - *Vim-Plug:* `Plug 'mbbill/undotree'`
