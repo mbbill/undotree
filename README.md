@@ -6,6 +6,20 @@
 
 ![](https://sites.google.com/site/mbbill/undotree_new.png)
 
+### Table of Contents
+
+<!-- TOC -->
+
+- [Description](#description)
+- [Download and Install](#download-and-install)
+- [Usage](#usage)
+    - [Configuration](#configuration)
+    - [Debug](#debug)
+- [License](#license)
+- [Author](#author)
+
+<!-- /TOC -->
+
 ### Description
 
 The plug-in visualizes undo history and makes it easier to browse and switch between different undo branches. You might wonder what is undo "branches"? It's a vim feature that allows you to go back to a state when it is overwritten by the latest edit. For most editors, if you make a change A, followed by B, then go back to A and make another change C, normally you won't be able to go back to B because undo history is linear. That's not the case for Vim because it internally keeps all the edit history as a tree structure, and this plug-in exposes the tree to you so that you not only can switch back and forth but also can switch between branches.
@@ -24,7 +38,7 @@ Undotree is written in **pure Vim script** and doesn't rely on any third-party t
 
 Using Vim's built-in package manager:
 
-```
+```sh
 mkdir -p ~/.vim/pack/mbbill/start
 cd ~/.vim/pack/mbbill/start
 git clone https://github.com/mbbill/undotree.git
@@ -45,7 +59,7 @@ And install them with the following:
 
   1. Use `:UndotreeToggle` to toggle the undo-tree panel. You may want to map this command to whatever hotkey by adding the following line to your vimrc, take `F5` for example.
 
-```
+```vim
 nnoremap <F5> :UndotreeToggle<CR>
 ```
 
@@ -60,7 +74,7 @@ nnoremap <F5> :UndotreeToggle<CR>
   3. Persistent undo
      * Usually, I would like to store the undo files in a separate place like below.
 
-```
+```vim
 if has("persistent_undo")
    let target_path = expand('~/.undodir')
 
@@ -75,11 +89,11 @@ if has("persistent_undo")
 endif
 ```
 
-### Configuration
+#### Configuration
 
 [Here](https://github.com/mbbill/undotree/blob/master/plugin/undotree.vim#L15) is a list of options.
 
-### Debug
+#### Debug
 
   1. Create a file under $HOME with the name `undotree_debug.log`
      * `$touch ~/undotree_debug.log`
