@@ -4,7 +4,21 @@
 
 ### Screenshot
 
-![](https://sites.google.com/site/mbbill/undotree_new.png)
+![](doc/_static/undotree.png)
+
+### Table of Contents
+
+<!-- TOC -->
+
+- [Description](#description)
+- [Download and Install](#download-and-install)
+- [Usage](#usage)
+    - [Configuration](#configuration)
+    - [Debug](#debug)
+- [License](#license)
+- [Author](#author)
+
+<!-- /TOC -->
 
 ### Description
 
@@ -24,7 +38,7 @@ Undotree is written in **pure Vim script** and doesn't rely on any third-party t
 
 Using Vim's built-in package manager:
 
-```
+```sh
 mkdir -p ~/.vim/pack/mbbill/start
 cd ~/.vim/pack/mbbill/start
 git clone https://github.com/mbbill/undotree.git
@@ -45,7 +59,7 @@ And install them with the following:
 
   1. Use `:UndotreeToggle` to toggle the undo-tree panel. You may want to map this command to whatever hotkey by adding the following line to your vimrc, take `F5` for example.
 
-```
+```vim
 nnoremap <F5> :UndotreeToggle<CR>
 ```
 
@@ -60,7 +74,7 @@ nnoremap <F5> :UndotreeToggle<CR>
   3. Persistent undo
      * Usually, I would like to store the undo files in a separate place like below.
 
-```
+```vim
 if has("persistent_undo")
    let target_path = expand('~/.undodir')
 
@@ -75,11 +89,11 @@ if has("persistent_undo")
 endif
 ```
 
-### Configuration
+#### Configuration
 
 [Here](https://github.com/mbbill/undotree/blob/master/plugin/undotree.vim#L15) is a list of options.
 
-### Debug
+#### Debug
 
   1. Create a file under $HOME with the name `undotree_debug.log`
      * `$touch ~/undotree_debug.log`
