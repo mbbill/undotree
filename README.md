@@ -4,7 +4,7 @@
 
 ### Screenshot
 
-![](https://sites.google.com/site/mbbill/undotree_new.png)
+![](doc/_static/undotree.png)
 
 ### Table of Contents
 
