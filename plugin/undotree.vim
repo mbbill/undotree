@@ -166,6 +166,13 @@ if !exists('g:undotree_CursorLine')
     let g:undotree_CursorLine = 1
 endif
 
+" Highlight the changed text even when the diff panel is off.
+" This will cause a slight delay on switching between undo nodes because it needs to
+" dump contents to temporary files and invoke external tools to get a diff.
+if !exists('g:undotree_alwaysHighlightDiff')
+    let g:undotree_alwaysHighlightDiff = 0
+endif
+
 "=================================================
 " User commands.
 command! -n=0 -bar UndotreeToggle   :call undotree#UndotreeToggle()

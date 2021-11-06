@@ -93,6 +93,7 @@ let s:keymap += [['Redo','<c-r>','Redo']]
 let s:keymap += [['Undo','u','Undo']]
 let s:keymap += [['Enter','<2-LeftMouse>','Move to the current state']]
 let s:keymap += [['Enter','<cr>','Move to the current state']]
+let s:keymap += [['Search','/','Search undo history']]
 
 " 'Diff' sign definitions. There are two 'delete' signs; a 'normal' one and one
 " that is used if the very end of the buffer has been deleted (in which case the
@@ -293,6 +294,8 @@ function! s:undotree.Init() abort
     let self.asciimeta = []     "meta data behind ascii tree.
     let self.seq2index = {}     "table used to convert seq to index.
     let self.showHelp = 0
+
+    let self.last_searched_pattern = ""
 endfunction
 
 function! s:undotree.BindKey() abort
@@ -438,12 +441,53 @@ function! s:undotree.ActionClose() abort
     call self.Toggle()
 endfunction
 
-function! s:undotree.UpdateDiff() abort
-    call s:log("undotree.UpdateDiff()")
-    if !t:diffpanel.IsVisible()
+function! s:undotree.ActionSearch() abort
+    call self.Search()
+endfunction
+
+function! s:undotree.Search() abort
+    let searched_pattern = input("Search undo history: ", self.last_searched_pattern)
+    if searched_pattern == ""
+        return
+    else
+        let self.last_searched_pattern = searched_pattern
+    endif
+    let current_seq = self.seq_cur - 1
+    if current_seq <= 0
         return
     endif
-    call t:diffpanel.Update(self.seq_cur,self.targetBufnr,self.targetid)
+    " Build diff cache. This is gna be slow.
+    "let ending_seq = 0
+    "if current_seq > 10
+    "    let ending_seq = current_seq - 10
+    "endif
+    let found = 0
+    while current_seq > 1
+        call self.ActionInTarget('u '.current_seq)
+        call t:diffpanel.Update(current_seq,self.targetBufnr,self.targetid, 1)
+        " todo: move this into a diff panel method
+        let diffresult = t:diffpanel.cache[self.targetBufnr.'_'.current_seq]
+        if matchstr(diffresult, searched_pattern) != ''
+            let found = 1
+            break
+        endif
+        let current_seq = current_seq - 1
+    endwhile
+    if found == 1
+        call self.ActionInTarget('u '.current_seq)
+        echo "Found!"
+    else
+        echo "Not Found"
+    endif
+    "call self.ActionInTarget('u '.self.asciimeta[index].seq)
+endfunction
+
+function! s:undotree.UpdateDiff() abort
+    call s:log("undotree.UpdateDiff()")
+    if ! g:undotree_alwaysHighlightDiff && !t:diffpanel.IsVisible()
+        return
+    endif
+    call t:diffpanel.Update(self.seq_cur,self.targetBufnr,self.targetid, 0)
 endfunction
 
 " May fail due to target window closed.
@@ -1018,17 +1062,17 @@ endfunction
 "diff panel
 let s:diffpanel = s:new(s:panel)
 
-function! s:diffpanel.Update(seq,targetBufnr,targetid) abort
+function! s:diffpanel.Update(seq,targetBufnr,targetid,building_cache) abort
     call s:log('diffpanel.Update(),seq:'.a:seq.' bufname:'.bufname(a:targetBufnr))
     if !self.diffexecutable
         return
     endif
-    let diffresult = []
+    let diffresult = ""
     let self.changes.add = 0
     let self.changes.del = 0
 
     if a:seq == 0
-        let diffresult = []
+        let diffresult = ""
     else
         if has_key(self.cache,a:targetBufnr.'_'.a:seq)
             call s:log("diff cache hit.")
@@ -1069,8 +1113,8 @@ function! s:diffpanel.Update(seq,targetBufnr,targetid) abort
             if writefile(new,tempfile2) == -1
                 echoerr "Can not write to temp file:".tempfile2
             endif
-            let diffresult = split(system(g:undotree_DiffCommand.' '.tempfile1.' '.tempfile2),"\n")
-            call s:log("diffresult: ".string(diffresult))
+            let diffresult = system(g:undotree_DiffCommand.' '.tempfile1.' '.tempfile2)
+            call s:log("diffresult: ".diffresult)
             if delete(tempfile1) != 0
                 echoerr "Can not delete temp file:".tempfile1
             endif
@@ -1083,23 +1127,27 @@ function! s:diffpanel.Update(seq,targetBufnr,targetid) abort
         endif
     endif
 
-    call self.ParseDiff(diffresult, a:targetBufnr)
-
-    call self.SetFocus()
-
-    setlocal modifiable
-    call s:exec('1,$ d _')
-
-    call append(0,diffresult)
-    call append(0,'- seq: '.a:seq.' -')
-
-    "remove the last empty line
-    if getline("$") == ""
-        call s:exec('$d _')
+    if a:building_cache != 1
+        call self.ParseDiff(split(diffresult, "\n"), a:targetBufnr)
     endif
-    call s:exec('norm! gg') "move cursor to line 1.
-    setlocal nomodifiable
-    call t:undotree.SetFocus()
+
+    if self.IsVisible() && a:building_cache != 1
+        call self.SetFocus()
+
+        setlocal modifiable
+        call s:exec('1,$ d _')
+
+        call append(0,split(diffresult, "\n"))
+        call append(0,'- seq: '.a:seq.' -')
+
+        "remove the last empty line
+        if getline("$") == ""
+            call s:exec('$d _')
+        endif
+        call s:exec('norm! gg') "move cursor to line 1.
+        setlocal nomodifiable
+        call t:undotree.SetFocus()
+    endif
 endfunction
 
 function! s:diffpanel.ParseDiff(diffresult, targetBufnr) abort
