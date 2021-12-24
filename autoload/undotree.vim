@@ -533,11 +533,11 @@ function! s:undotree.Show() abort
     setlocal nospell
     setlocal nonumber
     setlocal norelativenumber
-	if g:undotree_CursorLine
-		setlocal cursorline
-	else
-		setlocal nocursorline
-	endif
+    if g:undotree_CursorLine
+        setlocal cursorline
+    else
+        setlocal nocursorline
+    endif
     setlocal nomodifiable
     setlocal statusline=%!t:undotree.GetStatusLine()
     setfiletype undotree
@@ -1422,3 +1422,4 @@ function! undotree#UndotreeFocus() abort
     endif
 endfunction
 
+" vim: set et fdm=marker sts=4 sw=4:
