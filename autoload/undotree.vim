@@ -1422,3 +1422,4 @@ function! undotree#UndotreeFocus() abort
     endif
 endfunction
 
+" vim: set et fdm=marker sts=4 sw=4:
