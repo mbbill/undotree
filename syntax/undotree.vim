@@ -4,8 +4,8 @@
 " Author: Ming Bai <mbbill@gmail.com>
 " License: BSD
 
-syn match UndotreeNode ' \zs\*\ze '
-syn match UndotreeNodeCurrent '\zs\*\ze.*>\d\+<'
+execute "syn match UndotreeNode ' \\zs".escape(g:undotree_TreeNodeShape,'*')."\\ze '"
+execute "syn match UndotreeNodeCurrent '\\zs".escape(g:undotree_TreeNodeShape,'*')."\\ze.*>\d\+<'"
 syn match UndotreeTimeStamp '(.*)$'
 syn match UndotreeFirstNode 'Original'
 execute "syn match UndotreeBranch '[".escape(g:undotree_TreeVertShape.g:undotree_TreeSplitShape.g:undotree_TreeReturnShape,'\')."]'"
