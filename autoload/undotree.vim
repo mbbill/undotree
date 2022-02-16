@@ -533,11 +533,11 @@ function! s:undotree.Show() abort
     setlocal nospell
     setlocal nonumber
     setlocal norelativenumber
-	if g:undotree_CursorLine
-		setlocal cursorline
-	else
-		setlocal nocursorline
-	endif
+    if g:undotree_CursorLine
+        setlocal cursorline
+    else
+        setlocal nocursorline
+    endif
     setlocal nomodifiable
     setlocal statusline=%!t:undotree.GetStatusLine()
     setfiletype undotree
@@ -1034,11 +1034,8 @@ function! s:diffpanel.Update(seq,targetBufnr,targetid) abort
             call s:log("diff cache hit.")
             let diffresult = self.cache[a:targetBufnr.'_'.a:seq]
         else
-            let ei_bak = &eventignore
-            set eventignore=all
-            let targetWinnr = -1
-
             " Double check the target winnr and bufnr
+            let targetWinnr = -1
             for winnr in range(1, winnr('$')) "winnr starts from 1
                 if (getwinvar(winnr,'undotree_id') == a:targetid)
                             \&& winbufnr(winnr) == a:targetBufnr
@@ -1048,6 +1045,10 @@ function! s:diffpanel.Update(seq,targetBufnr,targetid) abort
             if targetWinnr == -1
                 return
             endif
+
+            let ei_bak = &eventignore
+            set eventignore=all
+
             call s:exec_silent(targetWinnr." wincmd w")
 
             " remember and restore cursor and window position.
@@ -1422,3 +1423,4 @@ function! undotree#UndotreeFocus() abort
     endif
 endfunction
 
+" vim: set et fdm=marker sts=4 sw=4:
