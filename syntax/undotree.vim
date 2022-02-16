@@ -8,7 +8,7 @@ syn match UndotreeNode ' \zs\*\ze '
 syn match UndotreeNodeCurrent '\zs\*\ze.*>\d\+<'
 syn match UndotreeTimeStamp '(.*)$'
 syn match UndotreeFirstNode 'Original'
-syn match UndotreeBranch '[|/\\]'
+execute "syn match UndotreeBranch '[".escape(g:undotree_TreeVertShape.g:undotree_TreeSplitShape.g:undotree_TreeReturnShape,'\')."]'"
 syn match UndotreeSeq ' \zs\d\+\ze '
 syn match UndotreeCurrent '>\d\+<'
 syn match UndotreeNext '{\d\+}'

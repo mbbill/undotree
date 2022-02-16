@@ -5,7 +5,7 @@ Licence:        BSD
 Homepage:       https://github.com/mbbill/undotree/
 
 ==============================================================================
-CONTENTS                                                   *undotree-contents*
+CONTENTS                                                     *undotree-contents*
 
     1. Intro ................................ |undotree-intro|
     2. Usage ................................ |undotree-usage|
@@ -18,25 +18,27 @@ CONTENTS                                                   *undotree-contents*
         3.5  undotree_DiffAutoOpen .......... |undotree_DiffAutoOpen|
         3.6  undotree_SetFocusWhenToggle .... |undotree_SetFocusWhenToggle|
         3.7  undotree_TreeNodeShape ......... |undotree_TreeNodeShape|
-        3.8  undotree_TreeVertShape ......... |undotree_TreeVertShape|
-        3.9  undotree_TreeSplitShape ........ |undotree_TreeSplitShape|
-        3.10  undotree_DiffCommand ........... |undotree_DiffCommand|
-        3.11  undotree_RelativeTimestamp ..... |undotree_RelativeTimestamp|
-        3.12 undotree_ShortIndicators ....... |undotree_ShortIndicators|
-        3.13 undotree_HighlightChangedText .. |undotree_HighlightChangedText|
-        3.14 undotree_HighlightSyntaxAdd .... |undotree_HighlightSyntaxAdd|
+             undotree_TreeVertShape ......... |undotree_TreeVertShape|
+             undotree_TreeSplitShape ........ |undotree_TreeSplitShape|
+             undotree_TreeReturnShape ....... |undotree_TreeReturnShape|
+        3.8  undotree_DiffCommand ........... |undotree_DiffCommand|
+        3.9  undotree_RelativeTimestamp ..... |undotree_RelativeTimestamp|
+        3.10 undotree_ShortIndicators ....... |undotree_ShortIndicators|
+        3.11 undotree_HighlightChangedText .. |undotree_HighlightChangedText|
+        3.12 undotree_HighlightSyntaxAdd .... |undotree_HighlightSyntaxAdd|
              undotree_HighlightSyntaxChange . |undotree_HighlightSyntaxChange|
-        3.15 Undotree_CustomMap ............. |Undotree_CustomMap|
-        3.16 undotree_HelpLine .............. |undotree_HelpLine|
+        3.13 Undotree_CustomMap ............. |Undotree_CustomMap|
+        3.14 undotree_HelpLine .............. |undotree_HelpLine|
+        3.15 undotree_CursorLine ............ |undotree_CursorLine|
     4. Bugs ................................. |undotree-bugs|
     5. Changelog ............................ |undotree-changelog|
     6. License .............................. |undotree-license|
 
 ==============================================================================
-1. Intro                                                      *undotree-intro*
+1. Intro                                                        *undotree-intro*
 
 The plug-in visualizes undo history and makes it easier to browse and switch
-between different undo branches. You might wonder what is undo "branches"?
+between different undo branches. You might wonder what are undo "branches"?
 It's vim feature that allows you to go back to a state when it is overwritten
 by a latest edit. For most editors, if you make a change A, then B, then go
 back to A and make change C, normally you won't be able to go back to B
@@ -57,7 +59,7 @@ undotree will bring you back instantly. Play with undo/redo on other editors
 is always dangerous because when you step back and accidentally typed
 something, boom! You lose your edits. But don't worry, that won't happen in
 Vim. Then you might ask what if I make some changes without saving and switch
-back to an old version and then exit? Well, imaging what would happen if you
+back to an old version and then exit? Well, imagine what would happen if you
 don't have undotree? You lose your latest edits and the file on disk is your
 last saved version. This behaviour remains the same with undotree. So, if you
 saved, you won't lose anything.
@@ -84,7 +86,7 @@ tools. It's lightweight, simple and fast. It only does what it supposed to do,
 and it only runs when you need it.
 
 ==============================================================================
-2. Usage                                                      *undotree-usage*
+2. Usage                                                        *undotree-usage*
 
 Use :UndotreeToggle to toggle the undo-tree panel. You may want to map this
 command to whatever hotkey by adding the following line to your vimrc, take F5
@@ -120,10 +122,10 @@ Usually I would like to store the undo files in a seperate place like below.
     endif
 <
 ==============================================================================
-3. Configuration                                             *undotree-config*
+3. Configuration                                               *undotree-config*
 
 ------------------------------------------------------------------------------
-3.1 g:undotree_WindowLayout                            *undotree_WindowLayout*
+3.1 g:undotree_WindowLayout                              *undotree_WindowLayout*
 
 Set the undotree window layout.
 
@@ -186,8 +188,8 @@ Style 4
 Default: 1
 
 ------------------------------------------------------------------------------
-3.2  g:undotree_CustomUndotreeCmd                 *undotree_CustomUndotreeCmd*
-     g:undotree_CustomDiffpanelCmd               *undotree_CustomDiffpanelCmd*
+3.2  g:undotree_CustomUndotreeCmd                   *undotree_CustomUndotreeCmd*
+     g:undotree_CustomDiffpanelCmd                 *undotree_CustomDiffpanelCmd*
 
 Set up custom window layout.
 
@@ -271,28 +273,28 @@ Examples:
             when closing a window, set the 'noequalalways' option.
 
 ------------------------------------------------------------------------------
-3.3 g:undotree_SplitWidth                                *undotree_SplitWidth*
+3.3 g:undotree_SplitWidth                                  *undotree_SplitWidth*
 
 Set the undotree window width.
 
 Default: 30
 
 ------------------------------------------------------------------------------
-3.4 g:undotree_DiffpanelHeight                      *undotree_DiffpanelHeight*
+3.4 g:undotree_DiffpanelHeight                        *undotree_DiffpanelHeight*
 
 Set the diff window height.
 
 Default: 10
 
 ------------------------------------------------------------------------------
-3.5 g:undotree_DiffAutoOpen                            *undotree_DiffAutoOpen*
+3.5 g:undotree_DiffAutoOpen                              *undotree_DiffAutoOpen*
 
 Set this to 1 to auto open the diff window.
 
 Default: 1
 
 ------------------------------------------------------------------------------
-3.6 g:undotree_SetFocusWhenToggle                *undotree_SetFocusWhenToggle*
+3.6 g:undotree_SetFocusWhenToggle                  *undotree_SetFocusWhenToggle*
 
 If set to 1, the undotree window will get focus after being opened, otherwise
 focus will stay in current window.
@@ -300,42 +302,34 @@ focus will stay in current window.
 Default: 0
 
 ------------------------------------------------------------------------------
-3.7 g:undotree_TreeNodeShape                          *undotree_TreeNodeShape*
+3.7 g:undotree_TreeNodeShape                            *undotree_TreeNodeShape*
+    g:undotree_TreeVertShape                            *undotree_TreeVertShape*
+    g:undotree_TreeSplitShape                          *undotree_TreeSplitShape*
+    g:undotree_TreeReturnShape                        *undotree_TreeReturnShape*
 
-Set the tree node shape.
+Set the characters used to draw the tree.
 
-Default: '*'
-
-------------------------------------------------------------------------------
-3.8 g:undotree_TreeVertShape                          *undotree_TreeVertShape*
-
-Set the tree vertical pipe shape.
-
-Default: '|'
-
-------------------------------------------------------------------------------
-3.9 g:undotree_TreeSplitShape                          *undotree_TreeSplitShape*
-
-Set the tree vertical pipe shape.
-
-Default: '/'
+g:undotree_TreeNodeShape   - Default: '*'
+g:undotree_TreeVertShape   - Default: '|'
+g:undotree_TreeSplitShape  - Default: '/'
+g:undotree_TreeReturnShape - Default: '\'
 
 ------------------------------------------------------------------------------
-3.10 g:undotree_DiffCommand                              *undotree_DiffCommand*
+3.8 g:undotree_DiffCommand                                *undotree_DiffCommand*
 
 Set the command used to get the diff output.
 
 Default: "diff"
 
 ------------------------------------------------------------------------------
-3.11 g:undotree_RelativeTimestamp                  *undotree_RelativeTimestamp*
+3.9 g:undotree_RelativeTimestamp                    *undotree_RelativeTimestamp*
 
 Set to 1 to use relative timestamp.
 
 Default: 1
 
 ------------------------------------------------------------------------------
-3.12 g:undotree_ShortIndicators                      *undotree_ShortIndicators*
+3.10 g:undotree_ShortIndicators                       *undotree_ShortIndicators*
 
 Set to 1 to get short timestamps when |undotree_RelativeTimestamp| is also
 enabled:
@@ -355,15 +349,15 @@ enabled:
 Default: 0
 
 ------------------------------------------------------------------------------
-3.13 g:undotree_HighlightChangedText           *undotree_HighlightChangedText*
+3.11 g:undotree_HighlightChangedText             *undotree_HighlightChangedText*
 
 Set to 1 to highlight the changed text.
 
 Default: 1
 
 ------------------------------------------------------------------------------
-3.14 g:undotree_HighlightSyntaxAdd               *undotree_HighlightSyntaxAdd*
-     g:undotree_HighlightSyntaxChange         *undotree_HighlightSyntaxChange*
+3.12 g:undotree_HighlightSyntaxAdd                 *undotree_HighlightSyntaxAdd*
+     g:undotree_HighlightSyntaxChange           *undotree_HighlightSyntaxChange*
 
 Set the highlight linked syntax type.
 You may chose your favorite through ":hi" command.
@@ -371,7 +365,7 @@ You may chose your favorite through ":hi" command.
 Default: "DiffAdd" and "DiffChange"
 
 ------------------------------------------------------------------------------
-3.15 g:Undotree_CustomMap                                 *Undotree_CustomMap*
+3.13 g:Undotree_CustomMap                                   *Undotree_CustomMap*
 
 There are two ways of changing the default key mappings:
 The first way is to define global mappings as the following example:
@@ -406,14 +400,14 @@ List of the commands available for redefinition.
 <
 
 ------------------------------------------------------------------------------
-3.16 g:undotree_HelpLine                                   *undotree_HelpLine*
+3.14 g:undotree_HelpLine                                     *undotree_HelpLine*
 
 Set to 0 to hide "Press ? for help".
 
 Default: 1
 
 ------------------------------------------------------------------------------
-3.17 g:undotree_CursorLine
+3.15 g:undotree_CursorLine
 
 Set to 0 to disable cursorline.
 
@@ -474,7 +468,7 @@ information.
     - Initial upload
 
 ==============================================================================
-6. License                                                  *undotree-license*
+6. License                                                    *undotree-license*
 
 BSD
 

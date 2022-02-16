@@ -124,6 +124,11 @@ if !exists('g:undotree_TreeSplitShape')
     let g:undotree_TreeSplitShape = '/'
 endif
 
+" tree return shape.
+if !exists('g:undotree_TreeReturnShape')
+    let g:undotree_TreeReturnShape = '\'
+endif
+
 if !exists('g:undotree_DiffCommand')
     let g:undotree_DiffCommand = "diff"
 endif
