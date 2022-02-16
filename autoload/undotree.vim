@@ -934,10 +934,10 @@ function! s:undotree.Render() abort
             if index+1 != len(slots) " not the last one, append '\'
                 for i in range(len(slots))
                     if i < index
-                        let newline = newline.'| '
+                        let newline = newline.g:undotree_TreeVertShape.' '
                     endif
                     if i > index
-                        let newline = newline.' \'
+                        let newline = newline.' '.g:undotree_TreeReturnShape
                     endif
                 endfor
             endif
@@ -974,10 +974,10 @@ function! s:undotree.Render() abort
                     let newline = newline.g:undotree_TreeVertShape." "
                 endif
                 if k == index
-                    let newline = newline.g:undotree_TreeVertShape."/ "
+                    let newline = newline.g:undotree_TreeVertShape.g:undotree_TreeSplitShape." "
                 endif
                 if k > index
-                    let newline = newline."/ "
+                    let newline = newline.g:undotree_TreeSplitShape." "
                 endif
             endfor
             call remove(slots,index)
