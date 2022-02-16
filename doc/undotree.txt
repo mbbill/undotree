@@ -307,12 +307,17 @@ Default: 0
     g:undotree_TreeSplitShape                          *undotree_TreeSplitShape*
     g:undotree_TreeReturnShape                        *undotree_TreeReturnShape*
 
-Set the characters used to draw the tree.
+Set the characters used to draw the tree. Although you can put any character
+you want in these shape variables, the only Unicode box drawing characters
+that work well are these three. Make sure your font will render them; you can
+easily see if that's the case in the last column of this table.
 
-g:undotree_TreeNodeShape   - Default: '*'
-g:undotree_TreeVertShape   - Default: '|'
-g:undotree_TreeSplitShape  - Default: '/'
-g:undotree_TreeReturnShape - Default: '\'
+Variable                   | Default       | Unicode Box Character
+---------------------------+---------------+-----------------------
+g:undotree_TreeNodeShape   | *             |
+g:undotree_TreeReturnShape | \ (backslash) | ╲ (U+2572)
+g:undotree_TreeVertShape   | | (pipe)      | │ (U+2502)
+g:undotree_TreeSplitShape  | / (slash)     | ╱ (U+2571)
 
 ------------------------------------------------------------------------------
 3.8 g:undotree_DiffCommand                                *undotree_DiffCommand*
