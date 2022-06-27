@@ -426,10 +426,12 @@ function! s:undotree.ActionClearHistory() abort
         return
     endif
     let ul_bak = &undolevels
+    let mod_bak = &modified
     let &undolevels = -1
     call s:exec("norm! a \<BS>\<Esc>")
     let &undolevels = ul_bak
-    unlet ul_bak
+    let &modified = mod_bak
+    unlet ul_bak mod_bak
     let self.targetBufnr = -1 "force update
     call self.Update()
 endfunction
