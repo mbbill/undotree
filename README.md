@@ -31,7 +31,7 @@ Some people have questions about file contents being changed when switching betw
 We all know that usually undo/redo is only for the current edit session. It's stored in memory and once the process exits, the undo history is lost. Although *undotree* makes switching between history states easier, it doesn't do more than that. Sometimes it would be much safer or more convenient to keep the undo history across edit sessions. In this case, you might need to enable a Vim feature called *persistent undo*. Let me explain how persistent undo works: instead of keeping undo history in *RAM*, persistent undo keeps undo history in a file. Let's say you make a change A, followed by B, then go back to A and make another change C, then you *save* the file. Now Vim save the file with content state C, and in the meantime it saves **the entire** undo history to a file including state A, B and C. Next time when you open the file, Vim will also restore undo history. So you can still go back to B. The history file is incremental, and every change will be recorded permanently, kind of like Git. You might think that's too much, well, *undotree* does provide a way to clean them up. If you need to enable *persistent undo*, type ```:h persistent-undo``` or follow the instructions below.
 
 
-Undotree is written in **pure Vim script** and doesn't rely on any third-party tools. It's lightweight, simple, and fast. It only does what it's supposed to do, and it only runs when you need it.
+Undotree is written in **pure Vim script** and doesn't rely on any third-party tools. It's lightweight, simple, and fast. It does only what it's supposed to do, and only runs when you need it.
 
 
 ### Download and Install
