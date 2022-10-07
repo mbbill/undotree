@@ -362,12 +362,13 @@ Default: 1
 
 ------------------------------------------------------------------------------
 3.12 g:undotree_HighlightSyntaxAdd                 *undotree_HighlightSyntaxAdd*
+     g:undotree_HighlightSyntaxDel                 *undotree_HighlightSyntaxDel*
      g:undotree_HighlightSyntaxChange           *undotree_HighlightSyntaxChange*
 
 Set the highlight linked syntax type.
 You may chose your favorite through ":hi" command.
 
-Default: "DiffAdd" and "DiffChange"
+Default: "DiffAdd", "DiffDelete" and "DiffChange"
 
 ------------------------------------------------------------------------------
 3.13 g:Undotree_CustomMap                                   *Undotree_CustomMap*
