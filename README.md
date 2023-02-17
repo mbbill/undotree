@@ -27,12 +27,11 @@ Undotree visualizes the undo history and makes it easy to browse and switch betw
 > Note: use `:help 'undolevels'` in Vim for information on configuring the size of the undo history
 
 
-### Safety
+### How it works
 
-Some people have questions about whether file contents change when switching between undo history states. Don't worry, *undotree* will **NEVER** save your data or write to disk. All it does is change the current buffer a little bit - just like those auto-completion plug-ins do - and will only add or remove something in the buffer temporarily. If you don't like the changes, you can go back to any prior state with just a single click. Let's say that you've made some change but didn't save it, then you use *undotree* to go back to some arbitrary previous version: your unsaved change does not get lost - it gets stored in the latest undo history node. Clicking on that node in *undotree* will bring you back instantly. Playing with undo/redo in other editors is always dangerous because if you step back and then accidentally type something, boom! You lose your edits. But don't worry, that will not happen in Vim. You might also be wondering, _what if I make some changes without saving then switch back to an older version and **exit**?_ Well, imagine what would happen if you didn't have *undotree*? You'd lose your latest edits and the file on disk would be your last saved version. This behavior **remains the same** with *undotree*. So, if you've saved the file, you will not lose anything.
+Some users may have questions about whether file contents change when switching between undo history states. With undotree, you don't need to worry about data loss or disk writes. The plugin will **never** save your data or write to disk. Instead, it modifies the current buffer temporarily, just like auto-completion plugins do. This means that any changes made by undotree are reversible with a single click, allowing you to easily revert to any prior state.
 
-> Note: use `:help persistent-undo` in Vim for instructions on how to persist the undo file
-
+Vim's undo/redo feature is a great way to protect your work from accidental changes or data loss. Unlike other editors, where undoing and then accidentally typing something can cause you to lose your edits, Vim allows you to revert to previous states without losing any data, as long as you keep the Vim session alive. If you want to keep your undo history permanently, Vim offers a persistent undo feature. This feature saves your undo history to a file on disk, allowing you to preserve your undo history across editing sessions. To enable persistent undo, refer to the instructions below. This can be a useful option for those who want to maintain a long-term undo history for a file or project.
 
 ### Persisting the undo history
 
@@ -40,7 +39,7 @@ Undo/redo functionality is a useful feature for most editors, including Vim. How
 
 Persistent undo saves the undo history in a file on disk, rather than in RAM. Whenever a change is made, Vim saves the edited file with its current state, while also saving the entire undo history to a separate file on disk that includes all states. This means that even after exiting Vim, the undo history is still available when you reopen the file, allowing you to continue to undo/redo changes. The undo history file is incremental and saves every change permanently, similar to Git.
 
-If you're worried about the potential storage space used by persistent undo files, undotree provides an option to clean them up. Additionally, undotree is written in pure Vim script, making it lightweight, simple, and fast, and only runs when needed. To enable persistent undo, simply type `:h persistent-undo` in Vim, or follow the instructions provided in the documentation.
+If you're worried about the potential storage space used by persistent undo files, undotree provides an option to clean them up. Additionally, undotree is written in pure Vim script, making it lightweight, simple, and fast, and only runs when needed. To enable persistent undo, simply type `:h persistent-undo` in Vim, or follow the instructions provided in the *Usage* section below.
 
 ### Download and Install
 
