@@ -56,29 +56,39 @@ Use whatever plug-in manager to pull the master branch. I've included 2 examples
 
 - *Vundle:* `Plugin 'mbbill/undotree'`
 - *Vim-Plug:* `Plug 'mbbill/undotree'`
+- *Packer:* `use 'mbbill/undotree'`
 
 And install them with the following:
 
 - *Vundle:* `:PluginInstall`
 - *Vim-Plug:* `:PlugInstall`
+- *Packer:* `:PackerSync`
 
 ### Usage
 
-  1. Use `:UndotreeToggle` to toggle the undo-tree panel. You may want to map this command to whatever hotkey by adding the following line to your vimrc, take `F5` for example.
+  1. Use `:UndotreeToggle` to toggle the undo-tree panel. 
+
+  You may want to map this command to whatever hotkey by adding the following line to your vimrc, take `F5` for example.
 
 ```vim
 nnoremap <F5> :UndotreeToggle<CR>
 ```
 
-  1. Markers
+  Or the equivalent mapping if using Neovim and Lua script.
+
+```lua
+vim.keymap.set('n', '<leader><F5>', vim.cmd.UndotreeToggle)
+```
+
+  2. Markers
      * Every change has a sequence number and it is displayed before timestamps.
      * The current state is marked as `> number <`.
      * The next state which will be restored by `:redo` or `<ctrl-r>` is marked as `{ number }`.
      * The `[ number ]` marks the most recent change.
      * The undo history is sorted by timestamps.
      * Saved changes are marked as `s` and the big `S` indicates the most recent saved change.
-  2. Press `?` in undotree window for quick help.
-  3. Persistent undo
+  3. Press `?` in undotree window for quick help.
+  4. Persistent undo
      * Usually, I would like to store the undo files in a separate place like below.
 
 ```vim
