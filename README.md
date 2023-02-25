@@ -80,15 +80,15 @@ nnoremap <F5> :UndotreeToggle<CR>
 vim.keymap.set('n', '<leader><F5>', vim.cmd.UndotreeToggle)
 ```
 
-  1. Markers
+  2. Markers
      * Every change has a sequence number and it is displayed before timestamps.
      * The current state is marked as `> number <`.
      * The next state which will be restored by `:redo` or `<ctrl-r>` is marked as `{ number }`.
      * The `[ number ]` marks the most recent change.
      * The undo history is sorted by timestamps.
      * Saved changes are marked as `s` and the big `S` indicates the most recent saved change.
-  2. Press `?` in undotree window for quick help.
-  3. Persistent undo
+  3. Press `?` in undotree window for quick help.
+  4. Persistent undo
      * Usually, I would like to store the undo files in a separate place like below.
 
 ```vim
