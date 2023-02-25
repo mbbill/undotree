@@ -66,10 +66,18 @@ And install them with the following:
 
 ### Usage
 
-  1. Use `:UndotreeToggle` to toggle the undo-tree panel. You may want to map this command to whatever hotkey by adding the following line to your vimrc, take `F5` for example.
+  1. Use `:UndotreeToggle` to toggle the undo-tree panel. 
+
+  You may want to map this command to whatever hotkey by adding the following line to your vimrc, take `F5` for example.
 
 ```vim
 nnoremap <F5> :UndotreeToggle<CR>
+```
+
+  Or the equivalent mapping if using Neovim and Lua script.
+
+```lua
+vim.keymap.set('n', '<leader><F5>', vim.cmd.UndotreeToggle)
 ```
 
   1. Markers
