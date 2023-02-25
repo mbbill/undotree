@@ -56,11 +56,13 @@ Use whatever plug-in manager to pull the master branch. I've included 2 examples
 
 - *Vundle:* `Plugin 'mbbill/undotree'`
 - *Vim-Plug:* `Plug 'mbbill/undotree'`
+- *Packer:* `use 'mbbill/undotree'`
 
 And install them with the following:
 
 - *Vundle:* `:PluginInstall`
 - *Vim-Plug:* `:PlugInstall`
+- *Packer:* `:PackerSync`
 
 ### Usage
 
