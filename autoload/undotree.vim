@@ -562,7 +562,7 @@ function! s:undotree.Show() abort
 
     setlocal winfixwidth
     setlocal noswapfile
-    setlocal buftype=nowrite
+    setlocal buftype=nofile
     setlocal bufhidden=delete
     setlocal nowrap
     setlocal foldcolumn=0
@@ -1277,7 +1277,7 @@ function! s:diffpanel.Show() abort
     setlocal winfixwidth
     setlocal winfixheight
     setlocal noswapfile
-    setlocal buftype=nowrite
+    setlocal buftype=nofile
     setlocal bufhidden=delete
     setlocal nowrap
     setlocal nobuflisted
