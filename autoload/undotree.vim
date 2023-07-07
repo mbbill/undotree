@@ -1407,6 +1407,8 @@ function! undotree#UndotreeToggle() abort
         endif
         if !exists('t:undotree')
             let t:undotree = s:new(s:undotree)
+        endif
+        if !exists('t:diffpanel')
             let t:diffpanel = s:new(s:diffpanel)
         endif
         call t:undotree.Toggle()
