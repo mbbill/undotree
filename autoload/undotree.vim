@@ -1462,4 +1462,16 @@ function! undotree#UndotreeFocus() abort
     endif
 endfunction
 
+function! undotree#UndotreePersistUndo(goSetUndofile = 0) abort
+    if ! &undofile
+        if !isdirectory(g:undotree_UndoDir)
+            call mkdir(g:undotree_UndoDir, 'p', 0700)
+        endif
+        exe "set undodir=" .. g:undotree_UndoDir
+        if filereadable(undofile(expand('%'))) || a:goSetUndofile
+            setlocal undofile
+        endif
+    endif
+endfunction
+
 " vim: set et fdm=marker sts=4 sw=4:

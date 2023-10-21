@@ -105,6 +105,8 @@ if has("persistent_undo")
     set undofile
 endif
 ```
+     * Alternatively, if you wish to persist the undo history for a currently
+       open file only, you can use the `:UndotreePersistUndo` command.
 
 #### Configuration
 
