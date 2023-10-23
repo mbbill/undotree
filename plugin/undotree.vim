@@ -176,11 +176,28 @@ if !exists('g:undotree_CursorLine')
     let g:undotree_CursorLine = 1
 endif
 
+" Define the default persistence undo directory if not defined in vim/nvim
+" startup script.
+if !exists('g:undotree_UndoDir')
+    let s:undoDir = &undodir
+    let s:subdir = has('nvim') ? 'nvim' : 'vim'
+    if s:undoDir == "."
+        let s:undoDir = $HOME .. '/.local/state/' .. s:subdir .. '/undo/'
+    endif
+    let g:undotree_UndoDir = s:undoDir
+endif
+
+augroup undotreeDetectPersistenceUndo
+    au!
+    au BufReadPost * call undotree#UndotreePersistUndo()
+augroup END
+
 "=================================================
 " User commands.
-command! -n=0 -bar UndotreeToggle   :call undotree#UndotreeToggle()
-command! -n=0 -bar UndotreeHide     :call undotree#UndotreeHide()
-command! -n=0 -bar UndotreeShow     :call undotree#UndotreeShow()
-command! -n=0 -bar UndotreeFocus    :call undotree#UndotreeFocus()
+command! -n=0 -bar UndotreeToggle      :call undotree#UndotreeToggle()
+command! -n=0 -bar UndotreeHide        :call undotree#UndotreeHide()
+command! -n=0 -bar UndotreeShow        :call undotree#UndotreeShow()
+command! -n=0 -bar UndotreeFocus       :call undotree#UndotreeFocus()
+command! -n=0 -bar UndotreePersistUndo :call undotree#UndotreePersistUndo(1)
 
 " vim: set et fdm=marker sts=4 sw=4:
