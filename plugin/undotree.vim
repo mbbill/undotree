@@ -182,14 +182,14 @@ if !exists('g:undotree_UndoDir')
     let s:undoDir = &undodir
     let s:subdir = has('nvim') ? 'nvim' : 'vim'
     if s:undoDir == "."
-        let s:undoDir = $HOME .. '/.local/state/' .. s:subdir .. '/undo/'
+        let s:undoDir = $HOME . '/.local/state/' . s:subdir . '/undo/'
     endif
     let g:undotree_UndoDir = s:undoDir
 endif
 
 augroup undotreeDetectPersistenceUndo
     au!
-    au BufReadPost * call undotree#UndotreePersistUndo()
+    au BufReadPost * call undotree#UndotreePersistUndo(0)
 augroup END
 
 "=================================================
