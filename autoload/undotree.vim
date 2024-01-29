@@ -1235,9 +1235,14 @@ function! s:diffpanel.Init() abort
     let self.bufname = "diffpanel_".s:getUniqueID()
     let self.cache = {}
     let self.changes = {'add':0, 'del':0}
-    let self.diffexecutable = executable('diff')
+    let self.diffexecutable = executable(g:undotree_DiffCommand)
     if !self.diffexecutable
-        echoerr '"diff" is not executable.'
+        " If the command contains parameters, strip out the executable itself
+        let cmd = matchstr(g:undotree_DiffCommand.' ', '.\{-}\ze\s.*')
+        let self.diffexecutable = executable(cmd)
+        if !self.diffexecutable
+            echoerr '"'.cmd.'" is not executable.'
+        endif
     endif
 endfunction
 
