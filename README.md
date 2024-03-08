@@ -110,7 +110,7 @@ endif
 
 #### Configuration
 
-[Here](https://github.com/mbbill/undotree/blob/master/plugin/undotree.vim#L15) is a list of options.
+[Here](https://github.com/mbbill/undotree/blob/master/plugin/undotree.vim#L27) is a list of options.
 
 #### Debug
 
