@@ -1476,7 +1476,7 @@ function! undotree#UndotreePersistUndo(goSetUndofile) abort
             call mkdir(g:undotree_UndoDir, 'p', 0700)
             call s:log(" > [Dir " . g:undotree_UndoDir . "] created.")
         endif
-        exe "set undodir=" . g:undotree_UndoDir
+        exe "set undodir=" . fnameescape(g:undotree_UndoDir)
         call s:log(" > [set undodir=" . g:undotree_UndoDir . "] executed.")
         if filereadable(undofile(expand('%'))) || a:goSetUndofile
             setlocal undofile
