@@ -58,6 +58,7 @@ let s:helpmore = ['"    ===== Marks ===== ',
             \'" >num< : The current state',
             \'" {num} : The next redo state',
             \'" [num] : The latest state',
+            \'" =num= : The diff mark',
             \'"   s   : Saved states',
             \'"   S   : The last saved state',
             \'"   ===== Hotkeys =====']
