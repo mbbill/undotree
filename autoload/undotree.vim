@@ -1182,10 +1182,15 @@ function! s:diffpanel.Update(seq,targetBufnr,targetid,diffmark) abort
     call s:exec('1,$ d _')
 
     call append(0,diffresult)
-    if a:diffmark != -1
+    if a:diffmark == -1 || a:seq == a:diffmark
+        call append(0,'+ seq: '.a:seq.' +')
+    elseif a:seq > a:diffmark
+        call append(0,'+ seq: '.a:seq.' +')
         call append(0,'- seq: '.a:diffmark.' -')
+    else
+        call append(0,'+ seq: '.a:diffmark.' +')
+        call append(0,'- seq: '.a:seq.' -')
     endif
-    call append(0,'+ seq: '.a:seq.' +')
 
     "remove the last empty line
     if getline("$") == ""
