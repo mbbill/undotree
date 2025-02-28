@@ -445,7 +445,7 @@ function! s:undotree.ActionDiffMark() abort
         return
     endif
     let seq = self.asciimeta[index].seq
-    if seq == -1 || seq == 0
+    if seq == -1
         return
     endif
     if seq == self.diffmark
