@@ -111,6 +111,9 @@ Markers
   * Saved changes are marked as s and the big S indicates the most recent
     saved change.
 
+  * The = number = marks user chosen change. When this mark is set the 
+    diff panel displays diff between current seq and marked seq.
+
   * Press ? in undotree window for quick help.
 
 Persistent undo
@@ -426,6 +429,8 @@ List of the commands available for redefinition.
     <plug>UndotreeRedo
     <plug>UndotreeUndo
     <plug>UndotreeEnter
+    <plug>UndotreeDiffMark
+    <plug>UndotreeClearDiffMark
 <
 
 ------------------------------------------------------------------------------
