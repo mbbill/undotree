@@ -1137,17 +1137,22 @@ function! s:diffpanel.Update(seq,targetBufnr,targetid,diffmark) abort
 
             if a:diffmark != -1
                 let diff_dist = a:seq - a:diffmark
-            endif
-            if diff_dist > 0
-                let new = getbufline(a:targetBufnr,'^','$')
-                execute 'silent earlier ' . diff_dist
-                let old = getbufline(a:targetBufnr,'^','$')
-                execute 'silent later ' . diff_dist
+                if diff_dist > 0
+                    let new = getbufline(a:targetBufnr,'^','$')
+                    execute 'silent earlier ' . diff_dist
+                    let old = getbufline(a:targetBufnr,'^','$')
+                    execute 'silent later ' . diff_dist
+                else
+                    let old = getbufline(a:targetBufnr,'^','$')
+                    execute 'silent later ' . (-diff_dist)
+                    let new = getbufline(a:targetBufnr,'^','$')
+                    execute 'silent earlier ' . (-diff_dist)
+                endif
             else
-                let old = getbufline(a:targetBufnr,'^','$')
-                execute 'silent later ' . (-diff_dist)
                 let new = getbufline(a:targetBufnr,'^','$')
-                execute 'silent earlier ' . (-diff_dist)
+                silent undo
+                let old = getbufline(a:targetBufnr,'^','$')
+                silent redo
             endif
 
             call winrestview(savedview)
