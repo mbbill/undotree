@@ -353,7 +353,7 @@ function! s:undotree.BindAu() abort
         au!
         au BufEnter <buffer> call s:exitIfLast()
         au BufEnter,BufLeave <buffer> if exists('t:undotree') |
-                    \let t:undotree.width = winwidth(winnr()) | endif
+                    \let t:undotree.width = g:undotree_SplitWidth | endif
         au BufWinLeave <buffer> if exists('t:diffpanel') |
                     \call t:diffpanel.Hide() | endif
     augroup end
