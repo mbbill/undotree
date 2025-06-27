@@ -103,10 +103,10 @@ let s:keymap += [['Enter','<cr>','Move to the current state']]
 " it is not possible to place a sign on the exact line - because it doesn't exist.
 " Instead, a 'special' delete sign is placed on the (existing) last line of the
 " buffer)
-exe 'sign define UndotreeAdd text=++ texthl='.undotree_HighlightSyntaxAdd
-exe 'sign define UndotreeChg text=~~ texthl='.undotree_HighlightSyntaxChange
-exe 'sign define UndotreeDel text=-- texthl='.undotree_HighlightSyntaxDel
-exe 'sign define UndotreeDelEnd text=-v texthl='.undotree_HighlightSyntaxDel
+exe 'sign define UndotreeAdd text='.undotree_SignAdded.' texthl='.undotree_HighlightSyntaxAdd
+exe 'sign define UndotreeChg text='.undotree_SignChanged.' texthl='.undotree_HighlightSyntaxChange
+exe 'sign define UndotreeDel text='.undotree_SignDeleted.' texthl='.undotree_HighlightSyntaxDel
+exe 'sign define UndotreeDelEnd text='.undotree_SignDeletedEnd.' texthl='.undotree_HighlightSyntaxDel
 
 " Id to use for all signs. This is an arbitrary number that is hoped to be unique
 " within the instance of vim. There is no way of guaranteeing it IS unique, which
