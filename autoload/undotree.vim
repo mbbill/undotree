@@ -637,6 +637,11 @@ function! s:undotree.Update() abort
     if exists('b:isUndotreeBuffer')
         return
     endif
+    " let the user disable undotree for chosen filetypes
+    if index(g:undotree_DisabledFiletypes, &filetype) != -1
+        call s:log("undotree.Update() disabled filetype")
+        return
+    endif
     if (&bt != '' && &bt != 'acwrite') || (&modifiable == 0) || (mode() != 'n')
         if &bt == 'quickfix' || &bt == 'nofile'
             "Do nothing for quickfix and q:
