@@ -518,7 +518,7 @@ function! s:undotree.SetTargetFocus() abort
     for winnr in range(1, winnr('$')) "winnr starts from 1
         if getwinvar(winnr,'undotree_id') == self.targetid
             if winnr() != winnr
-                call s:exec("norm! ".winnr."\<c-w>\<c-w>")
+                call s:exec_silent("norm! ".winnr."\<c-w>\<c-w>")
                 return 1
             endif
         endif
