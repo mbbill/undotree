@@ -607,7 +607,9 @@ function! s:undotree.Show() abort
         setlocal nocursorline
     endif
     setlocal nomodifiable
-    setlocal statusline=%!t:undotree.GetStatusLine()
+    if g:undotree_StatusLine
+        setlocal statusline=%!t:undotree.GetStatusLine()
+    endif
     setfiletype undotree
 
     call self.BindKey()
@@ -1364,7 +1366,9 @@ function! s:diffpanel.Show() abort
     setlocal norelativenumber
     setlocal nocursorline
     setlocal nomodifiable
-    setlocal statusline=%!t:diffpanel.GetStatusLine()
+    if g:undotree_StatusLine
+        setlocal statusline=%!t:diffpanel.GetStatusLine()
+    endif
 
     let &eventignore = ei_bak
 
