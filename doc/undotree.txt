@@ -36,7 +36,7 @@ CONTENTS                                                     *undotree-contents*
         3.16 undotree_CursorLine ............ |undotree_CursorLine|
         3.17 undotree_StatusLine ............ |undotree_StatusLine|
         3.18 undotree_DisabledFiletypes...... |undotree_DisabledFiletypes|
-        3.19 undotree_DisabledBuftypes...... |undotree_DisabledBuftypes|
+        3.19 undotree_DisabledBuftypes....... |undotree_DisabledBuftypes|
         3.20 undotree_UndoDir................ |undotree_UndoDir|
     4. Bugs ................................. |undotree-bugs|
     5. Changelog ............................ |undotree-changelog|
