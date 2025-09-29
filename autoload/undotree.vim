@@ -639,6 +639,11 @@ function! s:undotree.Update() abort
     if exists('b:isUndotreeBuffer')
         return
     endif
+    " let the user disable undotree for chosen buftypes
+    if index(g:undotree_DisabledBuftypes, &buftype) != -1
+        call s:log("undotree.Update() disabled buftype")
+        return
+    endif
     " let the user disable undotree for chosen filetypes
     if index(g:undotree_DisabledFiletypes, &filetype) != -1
         call s:log("undotree.Update() disabled filetype")

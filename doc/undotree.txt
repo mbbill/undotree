@@ -36,7 +36,8 @@ CONTENTS                                                     *undotree-contents*
         3.16 undotree_CursorLine ............ |undotree_CursorLine|
         3.17 undotree_StatusLine ............ |undotree_StatusLine|
         3.18 undotree_DisabledFiletypes...... |undotree_DisabledFiletypes|
-        3.19 undotree_UndoDir................ |undotree_UndoDir|
+        3.19 undotree_DisabledBuftypes...... |undotree_DisabledBuftypes|
+        3.20 undotree_UndoDir................ |undotree_UndoDir|
     4. Bugs ................................. |undotree-bugs|
     5. Changelog ............................ |undotree-changelog|
     6. License .............................. |undotree-license|
@@ -487,7 +488,14 @@ List of filetypes that Undotree will ignore.
 Default: empty
 
 ------------------------------------------------------------------------------
-3.19 g:undotree_UndoDir                                       *undotree_UndoDir*
+3.19 g:undotree_DisabledBuftypes                   *undotree_DisabledBuftypes*
+
+List of filetypes that Undotree will ignore.
+
+Default: ['terminal', 'prompt', 'quickfix']
+
+------------------------------------------------------------------------------
+3.20 g:undotree_UndoDir                                       *undotree_UndoDir*
 
 Set the path for the persistence undo directory. Due to the differing formats
 of the persistence undo files between nvim and vim, the default undodir for
