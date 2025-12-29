@@ -612,6 +612,8 @@ function! s:undotree.Show() abort
     endif
     setfiletype undotree
 
+    " Make :q call ActionClose
+    cabbrev <silent><buffer> q :call t:undotree.ActionClose()<CR>
     call self.BindKey()
     call self.BindAu()
 
