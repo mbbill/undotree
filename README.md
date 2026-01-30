@@ -20,6 +20,9 @@
 
 <!-- /TOC -->
 
+> [!Note]
+> If you are using Vim version 9.0 or higher, you can try out [this plugin](https://github.com/mao-yining/undotree.vim) for an experience with Vim9 script.
+
 ### Description
 
 Undotree visualizes the undo history and makes it easy to browse and switch between different undo branches. You may be wondering, _what are undo "branches" anyway?_ They're a feature of Vim that allow you to go back to a prior state even after it has been overwritten by later edits. For example: In most editors, if you make some change A, followed by change B, then go back to A and make another change C, normally you wouldn't be able to go back to change B because the undo history is linear. That's not the case with Vim, however. Vim internally stores the entire edit history for each file as a single, monolithic tree structure; this plug-in exposes that tree to you so that you can not only switch back and forth between older and more recent edits linearly but can also switch between diverging branches.
